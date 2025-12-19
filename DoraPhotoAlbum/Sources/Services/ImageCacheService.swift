@@ -64,6 +64,26 @@ class ImageCacheService {
         return fileManager.fileExists(atPath: filePath.path)
     }
     
+    // Get cached file URL if it exists
+    func getCachedFileURL(for url: URL) -> URL? {
+        let filePath = cacheFilePath(for: url)
+        return fileManager.fileExists(atPath: filePath.path) ? filePath : nil
+    }
+
+    // Move downloaded file to cache
+    func moveDownloadedFile(at tempURL: URL, for url: URL) throws {
+        let destinationURL = cacheFilePath(for: url)
+        if fileManager.fileExists(atPath: destinationURL.path) {
+            try? fileManager.removeItem(at: destinationURL)
+        }
+        try fileManager.moveItem(at: tempURL, to: destinationURL)
+        
+        // Check and clean cache asynchronously
+        queue.async {
+            self.cleanCacheIfNeeded()
+        }
+    }
+    
     // Get cached image
     func getCachedImage(for url: URL) -> UIImage? {
         // First check memory cache

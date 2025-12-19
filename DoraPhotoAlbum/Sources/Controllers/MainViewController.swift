@@ -16,6 +16,17 @@ class MainViewController: UIViewController {
         
         // Load Content
         checkPermissionsAndLoad()
+        
+        // Listen for notifications
+        NotificationCenter.default.addObserver(self, selector: #selector(handleMediaSourceChanged), name: .mediaSourceChanged, object: nil)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    @objc private func handleMediaSourceChanged() {
+        reloadMedia()
     }
     
     private func setupUI() {
@@ -68,20 +79,30 @@ class MainViewController: UIViewController {
     }
     
     private func loadMedia() {
+        let defaults = UserDefaults.standard
+        
         // Local
+        let localEnabled = defaults.object(forKey: AppConstants.Keys.kLocalAlbumEnabled) as? Bool ?? true
+        
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self else { return }
             
-            let localItems = PhotoService.shared.fetchLocalMedia()
+            var newItems: [UnifiedMediaItem] = []
+            
+            if localEnabled {
+                let localItems = PhotoService.shared.fetchLocalMedia()
+                newItems.append(contentsOf: localItems)
+            }
             
             DispatchQueue.main.async {
-                self.allItems = localItems
+                self.allItems = newItems
                 self.updateCountLabel()
             }
             
             // WebDAV
-            let defaults = UserDefaults.standard
-            if let host = defaults.string(forKey: AppConstants.Keys.kWebDAVHost), !host.isEmpty,
+            let webDAVEnabled = defaults.bool(forKey: AppConstants.Keys.kWebDAVEnabled)
+            if webDAVEnabled,
+               let host = defaults.string(forKey: AppConstants.Keys.kWebDAVHost), !host.isEmpty,
                let user = defaults.string(forKey: AppConstants.Keys.kWebDAVUser),
                let pass = defaults.string(forKey: AppConstants.Keys.kWebDAVPassword) {
                 
@@ -126,9 +147,19 @@ class MainViewController: UIViewController {
     
     @objc private func openSettings() {
         let settingsVC = SettingsViewController()
-        settingsVC.onSave = { [weak self] in
-            // Reload media when settings are saved
-            self?.reloadMedia()
+        settingsVC.onSave = { changeType in
+            switch changeType {
+            case .mediaSourceChanged:
+                // Handled by notification
+                break
+            case .playbackConfigChanged:
+                // Playback config (duration, music, etc.) will be picked up
+                // by SlideShowViewController next time it starts.
+                // We might want to update some UI here if needed, but current UI is simple.
+                print("MainViewController: Playback config changed")
+            case .other:
+                break
+            }
         }
         let nav = UINavigationController(rootViewController: settingsVC)
         if traitCollection.userInterfaceIdiom == .pad {

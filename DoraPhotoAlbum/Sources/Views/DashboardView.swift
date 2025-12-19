@@ -3,8 +3,6 @@ import CoreLocation
 
 class DashboardView: UIView {
     
-    private let timeLabel = UILabel()
-    private let dateLabel = UILabel()
     private let fileTypeLabel = UILabel()
     private let metaLabel = UILabel()
     
@@ -13,7 +11,7 @@ class DashboardView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
-        startClock()
+        startAntiBurnIn()
     }
     
     required init?(coder: NSCoder) {
@@ -44,15 +42,8 @@ class DashboardView: UIView {
             stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -15)
         ])
         
-        // Time: 12:45
-        timeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 32, weight: .bold)
-        timeLabel.textColor = .white
-        stack.addArrangedSubview(timeLabel)
-        
-        // Date: Mon, 12 Dec
-        dateLabel.font = UIFont.systemFont(ofSize: 14, weight: .medium)
-        dateLabel.textColor = UIColor(white: 0.9, alpha: 1)
-        stack.addArrangedSubview(dateLabel)
+        // Time: 12:45 removed
+        // Date: Mon, 12 Dec removed
         
         // File Type
         fileTypeLabel.font = UIFont.systemFont(ofSize: 14)
@@ -68,27 +59,11 @@ class DashboardView: UIView {
         stack.addArrangedSubview(metaLabel)
     }
     
-    private func startClock() {
-        updateTime()
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            self?.updateTime()
-        }
-        
+    private func startAntiBurnIn() {
         // Prevent Burn-in: Randomly shift position slightly every min
-        Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             self?.shiftPosition()
         }
-    }
-    
-    private func updateTime() {
-        let now = Date()
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "zh_CN")
-        formatter.dateFormat = "HH:mm"
-        timeLabel.text = formatter.string(from: now)
-        
-        formatter.dateFormat = "MMM d日 EEEE"
-        dateLabel.text = formatter.string(from: now)
     }
     
     func updateFileType(_ type: MediaType) {

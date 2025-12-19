@@ -52,6 +52,8 @@ class SlideShowViewController: UIViewController {
     private var dashboardView: DashboardView?
     private var controlsView: UIView?
     private var controlsTimer: Timer?
+    private var clockOverlayView: ClockOverlayView?
+    private var isClockMode: Bool = false
     
     // MARK: - Lifecycle
     
@@ -65,6 +67,18 @@ class SlideShowViewController: UIViewController {
         loadSettings()
         setupUI()
         setupInitialMusicState()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleMediaSourceChanged), name: .mediaSourceChanged, object: nil)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+        cleanup()
+    }
+    
+    @objc private func handleMediaSourceChanged() {
+        // Dismiss settings and slideshow to return to main screen for reload
+        self.presentingViewController?.dismiss(animated: true)
     }
     
     private func loadSettings() {
@@ -79,12 +93,15 @@ class SlideShowViewController: UIViewController {
         
         let contentModeIndex = UserDefaults.standard.integer(forKey: AppConstants.Keys.kContentMode)
         contentMode = (contentModeIndex == 1) ? .scaleAspectFit : .scaleAspectFill
+        
+        isClockMode = UserDefaults.standard.bool(forKey: AppConstants.Keys.kStartInClockMode)
     }
     
     private func setupUI() {
         view.backgroundColor = .black
         setupViews()
         setupDashboard()
+        setupClockOverlay()
         setupGestures()
     }
     
@@ -112,6 +129,30 @@ class SlideShowViewController: UIViewController {
         setupControls()
     }
     
+    private func setupClockOverlay() {
+        let clock = ClockOverlayView()
+        clock.translatesAutoresizingMaskIntoConstraints = false
+        clock.alpha = isClockMode ? 1 : 0
+        view.addSubview(clock)
+        self.clockOverlayView = clock
+        
+        // Ensure controls are always on top
+        if let controls = controlsView {
+            view.bringSubviewToFront(controls)
+        }
+        
+        NSLayoutConstraint.activate([
+            clock.topAnchor.constraint(equalTo: view.topAnchor),
+            clock.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            clock.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            clock.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+        
+        if isClockMode {
+            clock.startUpdating()
+        }
+    }
+    
     private func setupControls() {
         let controls = UIView()
         controls.translatesAutoresizingMaskIntoConstraints = false
@@ -121,10 +162,11 @@ class SlideShowViewController: UIViewController {
         
         let musicBtn = createControlButton(systemName: "music.note", title: "Music", action: #selector(toggleBackgroundMusic))
         let videoSoundBtn = createControlButton(systemName: "speaker.wave.2.fill", title: "Video", action: #selector(toggleVideoSound))
+        let clockBtn = createControlButton(systemName: "clock.fill", title: "Clock", action: #selector(toggleClockMode))
         let settingsBtn = createControlButton(systemName: "gearshape.fill", title: "Settings", action: #selector(openSettings))
         let closeBtn = createControlButton(systemName: "xmark.circle.fill", title: "Close", action: #selector(closeSlideshow))
         
-        let stack = UIStackView(arrangedSubviews: [musicBtn, videoSoundBtn, settingsBtn, closeBtn])
+        let stack = UIStackView(arrangedSubviews: [musicBtn, videoSoundBtn, clockBtn, settingsBtn, closeBtn])
         stack.axis = .horizontal
         let isPad = traitCollection.userInterfaceIdiom == .pad
         stack.spacing = isPad ? Constants.controlsSpacing : Constants.controlsSpacing * 0.6
@@ -171,14 +213,46 @@ class SlideShowViewController: UIViewController {
     
     // MARK: - Actions
     
+    @objc private func toggleClockMode() {
+        isClockMode.toggle()
+        
+        guard let clock = clockOverlayView else { return }
+        
+        if isClockMode {
+            clock.startUpdating()
+            UIView.animate(withDuration: Constants.fadeDuration) {
+                clock.alpha = 1
+                self.dashboardView?.alpha = 0 // Optionally hide dashboard in clock mode
+            }
+        } else {
+            UIView.animate(withDuration: Constants.fadeDuration, animations: {
+                clock.alpha = 0
+                self.dashboardView?.alpha = 1
+            }) { _ in
+                clock.stopUpdating()
+            }
+        }
+    }
+    
     @objc private func closeSlideshow() {
         dismiss(animated: true, completion: nil)
     }
     
     @objc private func openSettings() {
         let settingsVC = SettingsViewController()
-        settingsVC.onSave = { [weak self] in
-            self?.reloadSettings()
+        settingsVC.onSave = { [weak self] changeType in
+            guard let self = self else { return }
+            
+            switch changeType {
+            case .playbackConfigChanged:
+                self.reloadSettings()
+            case .mediaSourceChanged:
+                // Handled by notification
+                break
+            case .other:
+                // For schedule or cache changes, we might not need to do anything immediately
+                break
+            }
         }
         let nav = UINavigationController(rootViewController: settingsVC)
         if traitCollection.userInterfaceIdiom == .pad {
@@ -191,6 +265,11 @@ class SlideShowViewController: UIViewController {
     
     private func reloadSettings() {
         loadSettings()
+        
+        // Update clock mode if default changed (optional: currently we keep user's transient state)
+        // If we wanted to enforce setting: isClockMode = UserDefaults.standard.bool(forKey: AppConstants.Keys.kStartInClockMode)
+        // For now, let's just make sure the view updates if formatting changed.
+        // ClockOverlayView listens to notifications, so it handles formatting changes itself.
         
         // Update current player if playing
         player?.isMuted = isVideoMuted
@@ -265,7 +344,11 @@ class SlideShowViewController: UIViewController {
     @objc private func handleVerticalSwipe(_ gesture: UISwipeGestureRecognizer) {
         let targetAlpha: CGFloat = (gesture.direction == .down) ? 0 : 1
         UIView.animate(withDuration: Constants.fadeDuration) {
-            self.dashboardView?.alpha = targetAlpha
+            if self.isClockMode {
+                self.clockOverlayView?.alpha = targetAlpha
+            } else {
+                self.dashboardView?.alpha = targetAlpha
+            }
         }
     }
     
@@ -339,7 +422,10 @@ class SlideShowViewController: UIViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        cleanup()
+        // Cleanup is handled in deinit or when dismissing
+        if isBeingDismissed {
+            cleanup()
+        }
     }
     
     private func cleanup() {
@@ -349,6 +435,7 @@ class SlideShowViewController: UIViewController {
         controlsTimer = nil
         stopVideo(resumeMusic: false)
         MusicService.shared.stop()
+        clockOverlayView?.stopUpdating()
         cancelImageRequest()
     }
     
@@ -423,6 +510,30 @@ class SlideShowViewController: UIViewController {
             playVideo(item: item)
         } else {
             showImage(item: item)
+        }
+        
+        prefetchNextItem()
+    }
+    
+    private func prefetchNextItem() {
+        guard !items.isEmpty else { return }
+        
+        // currentIndex already points to the next item (or items.count)
+        var nextIndex = currentIndex
+        if nextIndex >= items.count {
+            nextIndex = 0
+        }
+        
+        let item = items[nextIndex]
+        
+        // Prefetch images only
+        if item.type == .image {
+            let scale = UIScreen.main.scale
+            let targetSize = CGSize(width: view.bounds.width * scale, height: view.bounds.height * scale)
+            let phContentMode: PHImageContentMode = (contentMode == .scaleAspectFit) ? .aspectFit : .aspectFill
+            
+            // Just request it to trigger caching
+            PhotoService.shared.requestImage(for: item, targetSize: targetSize, contentMode: phContentMode) { _ in }
         }
     }
     
@@ -611,6 +722,10 @@ class SlideShowViewController: UIViewController {
         if let dashboard = dashboardView {
             view.bringSubviewToFront(dashboard)
         }
+        if let clock = clockOverlayView {
+            view.bringSubviewToFront(clock)
+        }
+        // Controls must be the topmost layer
         if let controls = controlsView {
             view.bringSubviewToFront(controls)
         }

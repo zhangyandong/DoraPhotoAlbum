@@ -31,6 +31,16 @@
 		F551443B2EF5027A001835A0 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551442D2EF5027A001835A0 /* Constants.swift */; };
 		F551443C2EF5027A001835A0 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551441E2EF5027A001835A0 /* SettingsViewController.swift */; };
 		F551443E2EF5045F001835A0 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551443D2EF5045F001835A0 /* SceneDelegate.swift */; };
+		F55144432EF51A25001835A0 /* CacheSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551443F2EF51A25001835A0 /* CacheSettingsViewController.swift */; };
+		F55144442EF51A25001835A0 /* ScheduleSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144412EF51A25001835A0 /* ScheduleSettingsViewController.swift */; };
+		F55144452EF51A25001835A0 /* WebDAVSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144422EF51A25001835A0 /* WebDAVSettingsViewController.swift */; };
+		F55144462EF51A25001835A0 /* PlaybackSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144402EF51A25001835A0 /* PlaybackSettingsViewController.swift */; };
+		F55144482EF51DB9001835A0 /* MusicSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144472EF51DB9001835A0 /* MusicSettingsViewController.swift */; };
+		F551444A2EF5200B001835A0 /* LocalAlbumSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144492EF5200B001835A0 /* LocalAlbumSettingsViewController.swift */; };
+		F551444C2EF531B1001835A0 /* ClockSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551444B2EF531B1001835A0 /* ClockSettingsViewController.swift */; };
+		F551444E2EF531C1001835A0 /* ClockOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551444D2EF531C1001835A0 /* ClockOverlayView.swift */; };
+		F55144502EF536A2001835A0 /* AnalogClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551444F2EF536A2001835A0 /* AnalogClockView.swift */; };
+		F55144532EF53AAA001835A0 /* NSLayoutConstraint+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144512EF53AAA001835A0 /* NSLayoutConstraint+Extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -80,6 +90,16 @@
 		F551442B2EF5027A001835A0 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		F551442D2EF5027A001835A0 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		F551443D2EF5045F001835A0 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		F551443F2EF51A25001835A0 /* CacheSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheSettingsViewController.swift; sourceTree = "<group>"; };
+		F55144402EF51A25001835A0 /* PlaybackSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackSettingsViewController.swift; sourceTree = "<group>"; };
+		F55144412EF51A25001835A0 /* ScheduleSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleSettingsViewController.swift; sourceTree = "<group>"; };
+		F55144422EF51A25001835A0 /* WebDAVSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVSettingsViewController.swift; sourceTree = "<group>"; };
+		F55144472EF51DB9001835A0 /* MusicSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicSettingsViewController.swift; sourceTree = "<group>"; };
+		F55144492EF5200B001835A0 /* LocalAlbumSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalAlbumSettingsViewController.swift; sourceTree = "<group>"; };
+		F551444B2EF531B1001835A0 /* ClockSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClockSettingsViewController.swift; sourceTree = "<group>"; };
+		F551444D2EF531C1001835A0 /* ClockOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClockOverlayView.swift; sourceTree = "<group>"; };
+		F551444F2EF536A2001835A0 /* AnalogClockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalogClockView.swift; sourceTree = "<group>"; };
+		F55144512EF53AAA001835A0 /* NSLayoutConstraint+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSLayoutConstraint+Extensions.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -179,6 +199,13 @@
 				F551441E2EF5027A001835A0 /* SettingsViewController.swift */,
 				F551441F2EF5027A001835A0 /* SlideShowViewController.swift */,
 				F55144202EF5027A001835A0 /* WebDAVBrowserViewController.swift */,
+				F551443F2EF51A25001835A0 /* CacheSettingsViewController.swift */,
+				F551444B2EF531B1001835A0 /* ClockSettingsViewController.swift */,
+				F55144472EF51DB9001835A0 /* MusicSettingsViewController.swift */,
+				F55144492EF5200B001835A0 /* LocalAlbumSettingsViewController.swift */,
+				F55144402EF51A25001835A0 /* PlaybackSettingsViewController.swift */,
+				F55144412EF51A25001835A0 /* ScheduleSettingsViewController.swift */,
+				F55144422EF51A25001835A0 /* WebDAVSettingsViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -207,6 +234,8 @@
 		F551442C2EF5027A001835A0 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				F551444F2EF536A2001835A0 /* AnalogClockView.swift */,
+				F551444D2EF531C1001835A0 /* ClockOverlayView.swift */,
 				F551442B2EF5027A001835A0 /* DashboardView.swift */,
 			);
 			path = Views;
@@ -215,6 +244,7 @@
 		F551442E2EF5027A001835A0 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				F55144522EF53AAA001835A0 /* Extensions */,
 				F55144212EF5027A001835A0 /* Controllers */,
 				F55144232EF5027A001835A0 /* Models */,
 				F551442A2EF5027A001835A0 /* Services */,
@@ -222,6 +252,14 @@
 				F551442D2EF5027A001835A0 /* Constants.swift */,
 			);
 			path = Sources;
+			sourceTree = "<group>";
+		};
+		F55144522EF53AAA001835A0 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				F55144512EF53AAA001835A0 /* NSLayoutConstraint+Extensions.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -357,10 +395,18 @@
 			files = (
 				F551442F2EF5027A001835A0 /* DashboardView.swift in Sources */,
 				F55144302EF5027A001835A0 /* ImageCacheService.swift in Sources */,
+				F551444E2EF531C1001835A0 /* ClockOverlayView.swift in Sources */,
 				F55144312EF5027A001835A0 /* MusicService.swift in Sources */,
+				F55144432EF51A25001835A0 /* CacheSettingsViewController.swift in Sources */,
+				F55144442EF51A25001835A0 /* ScheduleSettingsViewController.swift in Sources */,
+				F55144482EF51DB9001835A0 /* MusicSettingsViewController.swift in Sources */,
+				F55144452EF51A25001835A0 /* WebDAVSettingsViewController.swift in Sources */,
+				F55144462EF51A25001835A0 /* PlaybackSettingsViewController.swift in Sources */,
 				F55144322EF5027A001835A0 /* PhotoService.swift in Sources */,
 				F55144332EF5027A001835A0 /* SlideShowViewController.swift in Sources */,
+				F551444C2EF531B1001835A0 /* ClockSettingsViewController.swift in Sources */,
 				F55144342EF5027A001835A0 /* BackgroundMusicSettingsViewController.swift in Sources */,
+				F55144502EF536A2001835A0 /* AnalogClockView.swift in Sources */,
 				F55144352EF5027A001835A0 /* MediaItem.swift in Sources */,
 				F551443E2EF5045F001835A0 /* SceneDelegate.swift in Sources */,
 				F55144362EF5027A001835A0 /* SchedulerService.swift in Sources */,
@@ -369,6 +415,8 @@
 				F55144392EF5027A001835A0 /* LocationService.swift in Sources */,
 				F551443A2EF5027A001835A0 /* WebDAVClient.swift in Sources */,
 				F551443B2EF5027A001835A0 /* Constants.swift in Sources */,
+				F551444A2EF5200B001835A0 /* LocalAlbumSettingsViewController.swift in Sources */,
+				F55144532EF53AAA001835A0 /* NSLayoutConstraint+Extensions.swift in Sources */,
 				F551443C2EF5027A001835A0 /* SettingsViewController.swift in Sources */,
 				514DEAFA2EF4E78E00546217 /* AppDelegate.swift in Sources */,
 			);

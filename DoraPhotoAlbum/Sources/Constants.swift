@@ -17,6 +17,20 @@ struct AppConstants {
         static let kMusicPlaybackMode = "kMusicPlaybackMode" // 0: Sequential, 1: Shuffle, 2: Single Loop
         static let kVideoMuted = "kVideoMuted"
         static let kCacheMaxSize = "kCacheMaxSize" // Maximum cache size in bytes (default: 2GB)
+        static let kLocalAlbumEnabled = "kLocalAlbumEnabled"
+        static let kWebDAVEnabled = "kWebDAVEnabled"
+        
+        // Clock Settings
+        static let kStartInClockMode = "kStartInClockMode"
+        static let kClockFormat24H = "kClockFormat24H"
+        static let kClockShowSeconds = "kClockShowSeconds"
+        static let kClockShowDate = "kClockShowDate"
+        static let kClockTheme = "kClockTheme" // 0: Digital, 1: Analog
     }
+}
+
+extension Notification.Name {
+    static let mediaSourceChanged = Notification.Name("MediaSourceChanged")
+    static let clockSettingsChanged = Notification.Name("ClockSettingsChanged")
 }
 

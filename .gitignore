@@ -1,0 +1,31 @@
+# macOS
+.DS_Store
+
+# Xcode build / derived data
+build/
+DerivedData/
+.DerivedData/
+
+# Xcode user-specific files
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+
+# Xcode legacy settings
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+# SwiftPM
+.build/
+.swiftpm/xcode/package.xcworkspace/
+
+# Artifacts
+*.ipa
+*.dSYM
+*.dSYM.zip
+*.xcresult
+
+

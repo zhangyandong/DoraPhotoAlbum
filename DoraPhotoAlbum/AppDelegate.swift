@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import AVFoundation
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -13,7 +14,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // iOS 12: 使用传统 AppDelegate window 生命周期（Main.storyboard 由 Info.plist/build settings 指定）
+        // Prevent screen from dimming/locking (photo frame style)
+        UIApplication.shared.isIdleTimerDisabled = true
+        
+        // Configure audio session (allow mixing with other audio)
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playback, options: [.mixWithOthers])
+            try session.setActive(true)
+        } catch {
+            print("Audio session setup failed: \(error)")
+        }
+        
+        // Setup window (we don't use SceneDelegate; support iOS12+)
+        window = UIWindow(frame: UIScreen.main.bounds)
+        let mainVC = MainViewController()
+        window?.rootViewController = mainVC
+        window?.makeKeyAndVisible()
         return true
     }
 

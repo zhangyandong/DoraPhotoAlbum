@@ -8,13 +8,29 @@
 
 /* Begin PBXBuildFile section */
 		514DEAFA2EF4E78E00546217 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514DEAF92EF4E78E00546217 /* AppDelegate.swift */; };
-		514DEAFE2EF4E78E00546217 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514DEAFD2EF4E78E00546217 /* ViewController.swift */; };
-		514DEB012EF4E78F00546217 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 514DEAFF2EF4E78F00546217 /* Main.storyboard */; };
 		514DEB032EF4E79000546217 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 514DEB022EF4E79000546217 /* Assets.xcassets */; };
 		514DEB062EF4E79000546217 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 514DEB042EF4E79000546217 /* LaunchScreen.storyboard */; };
 		514DEB112EF4E79000546217 /* DoraPhotoAlbumTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514DEB102EF4E79000546217 /* DoraPhotoAlbumTests.swift */; };
 		514DEB1B2EF4E79000546217 /* DoraPhotoAlbumUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514DEB1A2EF4E79000546217 /* DoraPhotoAlbumUITests.swift */; };
 		514DEB1D2EF4E79000546217 /* DoraPhotoAlbumUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514DEB1C2EF4E79000546217 /* DoraPhotoAlbumUITestsLaunchTests.swift */; };
+		F55144132EF4F895001835A0 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F55144122EF4F895001835A0 /* AVFoundation.framework */; };
+		F55144152EF4F8AB001835A0 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F55144142EF4F8AB001835A0 /* Photos.framework */; };
+		F55144172EF4F8B9001835A0 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F55144162EF4F8B9001835A0 /* UIKit.framework */; };
+		F551442F2EF5027A001835A0 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551442B2EF5027A001835A0 /* DashboardView.swift */; };
+		F55144302EF5027A001835A0 /* ImageCacheService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144242EF5027A001835A0 /* ImageCacheService.swift */; };
+		F55144312EF5027A001835A0 /* MusicService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144262EF5027A001835A0 /* MusicService.swift */; };
+		F55144322EF5027A001835A0 /* PhotoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144272EF5027A001835A0 /* PhotoService.swift */; };
+		F55144332EF5027A001835A0 /* SlideShowViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551441F2EF5027A001835A0 /* SlideShowViewController.swift */; };
+		F55144342EF5027A001835A0 /* BackgroundMusicSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551441C2EF5027A001835A0 /* BackgroundMusicSettingsViewController.swift */; };
+		F55144352EF5027A001835A0 /* MediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144222EF5027A001835A0 /* MediaItem.swift */; };
+		F55144362EF5027A001835A0 /* SchedulerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144282EF5027A001835A0 /* SchedulerService.swift */; };
+		F55144372EF5027A001835A0 /* WebDAVBrowserViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144202EF5027A001835A0 /* WebDAVBrowserViewController.swift */; };
+		F55144382EF5027A001835A0 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551441D2EF5027A001835A0 /* MainViewController.swift */; };
+		F55144392EF5027A001835A0 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144252EF5027A001835A0 /* LocationService.swift */; };
+		F551443A2EF5027A001835A0 /* WebDAVClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144292EF5027A001835A0 /* WebDAVClient.swift */; };
+		F551443B2EF5027A001835A0 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551442D2EF5027A001835A0 /* Constants.swift */; };
+		F551443C2EF5027A001835A0 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551441E2EF5027A001835A0 /* SettingsViewController.swift */; };
+		F551443E2EF5045F001835A0 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551443D2EF5045F001835A0 /* SceneDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,8 +53,6 @@
 /* Begin PBXFileReference section */
 		514DEAF62EF4E78E00546217 /* DoraPhotoAlbum.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoraPhotoAlbum.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		514DEAF92EF4E78E00546217 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		514DEAFD2EF4E78E00546217 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		514DEB002EF4E78F00546217 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		514DEB022EF4E79000546217 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		514DEB052EF4E79000546217 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		514DEB072EF4E79000546217 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -47,8 +61,25 @@
 		514DEB162EF4E79000546217 /* DoraPhotoAlbumUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DoraPhotoAlbumUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		514DEB1A2EF4E79000546217 /* DoraPhotoAlbumUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoraPhotoAlbumUITests.swift; sourceTree = "<group>"; };
 		514DEB1C2EF4E79000546217 /* DoraPhotoAlbumUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoraPhotoAlbumUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		514DEB292EF4E7B700546217 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Main.strings"; sourceTree = "<group>"; };
 		514DEB2A2EF4E7B700546217 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
+		F55144122EF4F895001835A0 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		F55144142EF4F8AB001835A0 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
+		F55144162EF4F8B9001835A0 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		F551441C2EF5027A001835A0 /* BackgroundMusicSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundMusicSettingsViewController.swift; sourceTree = "<group>"; };
+		F551441D2EF5027A001835A0 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
+		F551441E2EF5027A001835A0 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		F551441F2EF5027A001835A0 /* SlideShowViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideShowViewController.swift; sourceTree = "<group>"; };
+		F55144202EF5027A001835A0 /* WebDAVBrowserViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVBrowserViewController.swift; sourceTree = "<group>"; };
+		F55144222EF5027A001835A0 /* MediaItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaItem.swift; sourceTree = "<group>"; };
+		F55144242EF5027A001835A0 /* ImageCacheService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCacheService.swift; sourceTree = "<group>"; };
+		F55144252EF5027A001835A0 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
+		F55144262EF5027A001835A0 /* MusicService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicService.swift; sourceTree = "<group>"; };
+		F55144272EF5027A001835A0 /* PhotoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoService.swift; sourceTree = "<group>"; };
+		F55144282EF5027A001835A0 /* SchedulerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchedulerService.swift; sourceTree = "<group>"; };
+		F55144292EF5027A001835A0 /* WebDAVClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVClient.swift; sourceTree = "<group>"; };
+		F551442B2EF5027A001835A0 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		F551442D2EF5027A001835A0 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		F551443D2EF5045F001835A0 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +87,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F55144132EF4F895001835A0 /* AVFoundation.framework in Frameworks */,
+				F55144172EF4F8B9001835A0 /* UIKit.framework in Frameworks */,
+				F55144152EF4F8AB001835A0 /* Photos.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,6 +116,7 @@
 				514DEAF82EF4E78E00546217 /* DoraPhotoAlbum */,
 				514DEB0F2EF4E79000546217 /* DoraPhotoAlbumTests */,
 				514DEB192EF4E79000546217 /* DoraPhotoAlbumUITests */,
+				F55144112EF4F895001835A0 /* Frameworks */,
 				514DEAF72EF4E78E00546217 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -99,9 +134,9 @@
 		514DEAF82EF4E78E00546217 /* DoraPhotoAlbum */ = {
 			isa = PBXGroup;
 			children = (
+				F551442E2EF5027A001835A0 /* Sources */,
 				514DEAF92EF4E78E00546217 /* AppDelegate.swift */,
-				514DEAFD2EF4E78E00546217 /* ViewController.swift */,
-				514DEAFF2EF4E78F00546217 /* Main.storyboard */,
+				F551443D2EF5045F001835A0 /* SceneDelegate.swift */,
 				514DEB022EF4E79000546217 /* Assets.xcassets */,
 				514DEB042EF4E79000546217 /* LaunchScreen.storyboard */,
 				514DEB072EF4E79000546217 /* Info.plist */,
@@ -124,6 +159,69 @@
 				514DEB1C2EF4E79000546217 /* DoraPhotoAlbumUITestsLaunchTests.swift */,
 			);
 			path = DoraPhotoAlbumUITests;
+			sourceTree = "<group>";
+		};
+		F55144112EF4F895001835A0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F55144162EF4F8B9001835A0 /* UIKit.framework */,
+				F55144142EF4F8AB001835A0 /* Photos.framework */,
+				F55144122EF4F895001835A0 /* AVFoundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F55144212EF5027A001835A0 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				F551441C2EF5027A001835A0 /* BackgroundMusicSettingsViewController.swift */,
+				F551441D2EF5027A001835A0 /* MainViewController.swift */,
+				F551441E2EF5027A001835A0 /* SettingsViewController.swift */,
+				F551441F2EF5027A001835A0 /* SlideShowViewController.swift */,
+				F55144202EF5027A001835A0 /* WebDAVBrowserViewController.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		F55144232EF5027A001835A0 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				F55144222EF5027A001835A0 /* MediaItem.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		F551442A2EF5027A001835A0 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				F55144242EF5027A001835A0 /* ImageCacheService.swift */,
+				F55144252EF5027A001835A0 /* LocationService.swift */,
+				F55144262EF5027A001835A0 /* MusicService.swift */,
+				F55144272EF5027A001835A0 /* PhotoService.swift */,
+				F55144282EF5027A001835A0 /* SchedulerService.swift */,
+				F55144292EF5027A001835A0 /* WebDAVClient.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		F551442C2EF5027A001835A0 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				F551442B2EF5027A001835A0 /* DashboardView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		F551442E2EF5027A001835A0 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				F55144212EF5027A001835A0 /* Controllers */,
+				F55144232EF5027A001835A0 /* Models */,
+				F551442A2EF5027A001835A0 /* Services */,
+				F551442C2EF5027A001835A0 /* Views */,
+				F551442D2EF5027A001835A0 /* Constants.swift */,
+			);
+			path = Sources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -233,7 +331,6 @@
 			files = (
 				514DEB062EF4E79000546217 /* LaunchScreen.storyboard in Resources */,
 				514DEB032EF4E79000546217 /* Assets.xcassets in Resources */,
-				514DEB012EF4E78F00546217 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,7 +355,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				514DEAFE2EF4E78E00546217 /* ViewController.swift in Sources */,
+				F551442F2EF5027A001835A0 /* DashboardView.swift in Sources */,
+				F55144302EF5027A001835A0 /* ImageCacheService.swift in Sources */,
+				F55144312EF5027A001835A0 /* MusicService.swift in Sources */,
+				F55144322EF5027A001835A0 /* PhotoService.swift in Sources */,
+				F55144332EF5027A001835A0 /* SlideShowViewController.swift in Sources */,
+				F55144342EF5027A001835A0 /* BackgroundMusicSettingsViewController.swift in Sources */,
+				F55144352EF5027A001835A0 /* MediaItem.swift in Sources */,
+				F551443E2EF5045F001835A0 /* SceneDelegate.swift in Sources */,
+				F55144362EF5027A001835A0 /* SchedulerService.swift in Sources */,
+				F55144372EF5027A001835A0 /* WebDAVBrowserViewController.swift in Sources */,
+				F55144382EF5027A001835A0 /* MainViewController.swift in Sources */,
+				F55144392EF5027A001835A0 /* LocationService.swift in Sources */,
+				F551443A2EF5027A001835A0 /* WebDAVClient.swift in Sources */,
+				F551443B2EF5027A001835A0 /* Constants.swift in Sources */,
+				F551443C2EF5027A001835A0 /* SettingsViewController.swift in Sources */,
 				514DEAFA2EF4E78E00546217 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -296,15 +407,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		514DEAFF2EF4E78F00546217 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				514DEB002EF4E78F00546217 /* Base */,
-				514DEB292EF4E7B700546217 /* zh-Hans */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		514DEB042EF4E79000546217 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -438,6 +540,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 25SXM6G9T3;
@@ -445,7 +548,6 @@
 				INFOPLIST_FILE = DoraPhotoAlbum/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
@@ -456,6 +558,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "cn.tiger-sec.DoraPhotoAlbum";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -467,6 +573,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 25SXM6G9T3;
@@ -474,7 +581,6 @@
 				INFOPLIST_FILE = DoraPhotoAlbum/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
@@ -485,6 +591,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "cn.tiger-sec.DoraPhotoAlbum";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

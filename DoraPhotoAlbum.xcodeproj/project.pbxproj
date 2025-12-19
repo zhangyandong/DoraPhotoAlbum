@@ -1,0 +1,607 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		514DEAFA2EF4E78E00546217 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514DEAF92EF4E78E00546217 /* AppDelegate.swift */; };
+		514DEAFC2EF4E78E00546217 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514DEAFB2EF4E78E00546217 /* SceneDelegate.swift */; };
+		514DEAFE2EF4E78E00546217 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514DEAFD2EF4E78E00546217 /* ViewController.swift */; };
+		514DEB012EF4E78F00546217 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 514DEAFF2EF4E78F00546217 /* Main.storyboard */; };
+		514DEB032EF4E79000546217 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 514DEB022EF4E79000546217 /* Assets.xcassets */; };
+		514DEB062EF4E79000546217 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 514DEB042EF4E79000546217 /* LaunchScreen.storyboard */; };
+		514DEB112EF4E79000546217 /* DoraPhotoAlbumTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514DEB102EF4E79000546217 /* DoraPhotoAlbumTests.swift */; };
+		514DEB1B2EF4E79000546217 /* DoraPhotoAlbumUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514DEB1A2EF4E79000546217 /* DoraPhotoAlbumUITests.swift */; };
+		514DEB1D2EF4E79000546217 /* DoraPhotoAlbumUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514DEB1C2EF4E79000546217 /* DoraPhotoAlbumUITestsLaunchTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		514DEB0D2EF4E79000546217 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 514DEAEE2EF4E78E00546217 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 514DEAF52EF4E78E00546217;
+			remoteInfo = DoraPhotoAlbum;
+		};
+		514DEB172EF4E79000546217 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 514DEAEE2EF4E78E00546217 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 514DEAF52EF4E78E00546217;
+			remoteInfo = DoraPhotoAlbum;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		514DEAF62EF4E78E00546217 /* DoraPhotoAlbum.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoraPhotoAlbum.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		514DEAF92EF4E78E00546217 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		514DEAFB2EF4E78E00546217 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		514DEAFD2EF4E78E00546217 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		514DEB002EF4E78F00546217 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		514DEB022EF4E79000546217 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		514DEB052EF4E79000546217 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		514DEB072EF4E79000546217 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		514DEB0C2EF4E79000546217 /* DoraPhotoAlbumTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DoraPhotoAlbumTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		514DEB102EF4E79000546217 /* DoraPhotoAlbumTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoraPhotoAlbumTests.swift; sourceTree = "<group>"; };
+		514DEB162EF4E79000546217 /* DoraPhotoAlbumUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DoraPhotoAlbumUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		514DEB1A2EF4E79000546217 /* DoraPhotoAlbumUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoraPhotoAlbumUITests.swift; sourceTree = "<group>"; };
+		514DEB1C2EF4E79000546217 /* DoraPhotoAlbumUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoraPhotoAlbumUITestsLaunchTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		514DEAF32EF4E78E00546217 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		514DEB092EF4E79000546217 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		514DEB132EF4E79000546217 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		514DEAED2EF4E78E00546217 = {
+			isa = PBXGroup;
+			children = (
+				514DEAF82EF4E78E00546217 /* DoraPhotoAlbum */,
+				514DEB0F2EF4E79000546217 /* DoraPhotoAlbumTests */,
+				514DEB192EF4E79000546217 /* DoraPhotoAlbumUITests */,
+				514DEAF72EF4E78E00546217 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		514DEAF72EF4E78E00546217 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				514DEAF62EF4E78E00546217 /* DoraPhotoAlbum.app */,
+				514DEB0C2EF4E79000546217 /* DoraPhotoAlbumTests.xctest */,
+				514DEB162EF4E79000546217 /* DoraPhotoAlbumUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		514DEAF82EF4E78E00546217 /* DoraPhotoAlbum */ = {
+			isa = PBXGroup;
+			children = (
+				514DEAF92EF4E78E00546217 /* AppDelegate.swift */,
+				514DEAFB2EF4E78E00546217 /* SceneDelegate.swift */,
+				514DEAFD2EF4E78E00546217 /* ViewController.swift */,
+				514DEAFF2EF4E78F00546217 /* Main.storyboard */,
+				514DEB022EF4E79000546217 /* Assets.xcassets */,
+				514DEB042EF4E79000546217 /* LaunchScreen.storyboard */,
+				514DEB072EF4E79000546217 /* Info.plist */,
+			);
+			path = DoraPhotoAlbum;
+			sourceTree = "<group>";
+		};
+		514DEB0F2EF4E79000546217 /* DoraPhotoAlbumTests */ = {
+			isa = PBXGroup;
+			children = (
+				514DEB102EF4E79000546217 /* DoraPhotoAlbumTests.swift */,
+			);
+			path = DoraPhotoAlbumTests;
+			sourceTree = "<group>";
+		};
+		514DEB192EF4E79000546217 /* DoraPhotoAlbumUITests */ = {
+			isa = PBXGroup;
+			children = (
+				514DEB1A2EF4E79000546217 /* DoraPhotoAlbumUITests.swift */,
+				514DEB1C2EF4E79000546217 /* DoraPhotoAlbumUITestsLaunchTests.swift */,
+			);
+			path = DoraPhotoAlbumUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		514DEAF52EF4E78E00546217 /* DoraPhotoAlbum */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 514DEB202EF4E79000546217 /* Build configuration list for PBXNativeTarget "DoraPhotoAlbum" */;
+			buildPhases = (
+				514DEAF22EF4E78E00546217 /* Sources */,
+				514DEAF32EF4E78E00546217 /* Frameworks */,
+				514DEAF42EF4E78E00546217 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DoraPhotoAlbum;
+			productName = DoraPhotoAlbum;
+			productReference = 514DEAF62EF4E78E00546217 /* DoraPhotoAlbum.app */;
+			productType = "com.apple.product-type.application";
+		};
+		514DEB0B2EF4E79000546217 /* DoraPhotoAlbumTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 514DEB232EF4E79000546217 /* Build configuration list for PBXNativeTarget "DoraPhotoAlbumTests" */;
+			buildPhases = (
+				514DEB082EF4E79000546217 /* Sources */,
+				514DEB092EF4E79000546217 /* Frameworks */,
+				514DEB0A2EF4E79000546217 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				514DEB0E2EF4E79000546217 /* PBXTargetDependency */,
+			);
+			name = DoraPhotoAlbumTests;
+			productName = DoraPhotoAlbumTests;
+			productReference = 514DEB0C2EF4E79000546217 /* DoraPhotoAlbumTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		514DEB152EF4E79000546217 /* DoraPhotoAlbumUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 514DEB262EF4E79000546217 /* Build configuration list for PBXNativeTarget "DoraPhotoAlbumUITests" */;
+			buildPhases = (
+				514DEB122EF4E79000546217 /* Sources */,
+				514DEB132EF4E79000546217 /* Frameworks */,
+				514DEB142EF4E79000546217 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				514DEB182EF4E79000546217 /* PBXTargetDependency */,
+			);
+			name = DoraPhotoAlbumUITests;
+			productName = DoraPhotoAlbumUITests;
+			productReference = 514DEB162EF4E79000546217 /* DoraPhotoAlbumUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		514DEAEE2EF4E78E00546217 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1420;
+				LastUpgradeCheck = 1420;
+				TargetAttributes = {
+					514DEAF52EF4E78E00546217 = {
+						CreatedOnToolsVersion = 14.2;
+					};
+					514DEB0B2EF4E79000546217 = {
+						CreatedOnToolsVersion = 14.2;
+						TestTargetID = 514DEAF52EF4E78E00546217;
+					};
+					514DEB152EF4E79000546217 = {
+						CreatedOnToolsVersion = 14.2;
+						TestTargetID = 514DEAF52EF4E78E00546217;
+					};
+				};
+			};
+			buildConfigurationList = 514DEAF12EF4E78E00546217 /* Build configuration list for PBXProject "DoraPhotoAlbum" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 514DEAED2EF4E78E00546217;
+			productRefGroup = 514DEAF72EF4E78E00546217 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				514DEAF52EF4E78E00546217 /* DoraPhotoAlbum */,
+				514DEB0B2EF4E79000546217 /* DoraPhotoAlbumTests */,
+				514DEB152EF4E79000546217 /* DoraPhotoAlbumUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		514DEAF42EF4E78E00546217 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				514DEB062EF4E79000546217 /* LaunchScreen.storyboard in Resources */,
+				514DEB032EF4E79000546217 /* Assets.xcassets in Resources */,
+				514DEB012EF4E78F00546217 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		514DEB0A2EF4E79000546217 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		514DEB142EF4E79000546217 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		514DEAF22EF4E78E00546217 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				514DEAFE2EF4E78E00546217 /* ViewController.swift in Sources */,
+				514DEAFA2EF4E78E00546217 /* AppDelegate.swift in Sources */,
+				514DEAFC2EF4E78E00546217 /* SceneDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		514DEB082EF4E79000546217 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				514DEB112EF4E79000546217 /* DoraPhotoAlbumTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		514DEB122EF4E79000546217 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				514DEB1B2EF4E79000546217 /* DoraPhotoAlbumUITests.swift in Sources */,
+				514DEB1D2EF4E79000546217 /* DoraPhotoAlbumUITestsLaunchTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		514DEB0E2EF4E79000546217 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 514DEAF52EF4E78E00546217 /* DoraPhotoAlbum */;
+			targetProxy = 514DEB0D2EF4E79000546217 /* PBXContainerItemProxy */;
+		};
+		514DEB182EF4E79000546217 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 514DEAF52EF4E78E00546217 /* DoraPhotoAlbum */;
+			targetProxy = 514DEB172EF4E79000546217 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		514DEAFF2EF4E78F00546217 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				514DEB002EF4E78F00546217 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		514DEB042EF4E79000546217 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				514DEB052EF4E79000546217 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		514DEB1E2EF4E79000546217 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		514DEB1F2EF4E79000546217 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		514DEB212EF4E79000546217 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 25SXM6G9T3;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DoraPhotoAlbum/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "cn.tiger-sec.DoraPhotoAlbum";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		514DEB222EF4E79000546217 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 25SXM6G9T3;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DoraPhotoAlbum/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "cn.tiger-sec.DoraPhotoAlbum";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		514DEB242EF4E79000546217 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 25SXM6G9T3;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "cn.tiger-sec.DoraPhotoAlbumTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DoraPhotoAlbum.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DoraPhotoAlbum";
+			};
+			name = Debug;
+		};
+		514DEB252EF4E79000546217 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 25SXM6G9T3;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "cn.tiger-sec.DoraPhotoAlbumTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DoraPhotoAlbum.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DoraPhotoAlbum";
+			};
+			name = Release;
+		};
+		514DEB272EF4E79000546217 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 25SXM6G9T3;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "cn.tiger-sec.DoraPhotoAlbumUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = DoraPhotoAlbum;
+			};
+			name = Debug;
+		};
+		514DEB282EF4E79000546217 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 25SXM6G9T3;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "cn.tiger-sec.DoraPhotoAlbumUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = DoraPhotoAlbum;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		514DEAF12EF4E78E00546217 /* Build configuration list for PBXProject "DoraPhotoAlbum" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				514DEB1E2EF4E79000546217 /* Debug */,
+				514DEB1F2EF4E79000546217 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		514DEB202EF4E79000546217 /* Build configuration list for PBXNativeTarget "DoraPhotoAlbum" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				514DEB212EF4E79000546217 /* Debug */,
+				514DEB222EF4E79000546217 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		514DEB232EF4E79000546217 /* Build configuration list for PBXNativeTarget "DoraPhotoAlbumTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				514DEB242EF4E79000546217 /* Debug */,
+				514DEB252EF4E79000546217 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		514DEB262EF4E79000546217 /* Build configuration list for PBXNativeTarget "DoraPhotoAlbumUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				514DEB272EF4E79000546217 /* Debug */,
+				514DEB282EF4E79000546217 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 514DEAEE2EF4E78E00546217 /* Project object */;
+}

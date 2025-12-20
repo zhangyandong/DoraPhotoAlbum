@@ -94,7 +94,8 @@ class AnalogClockView: UIView {
         CATransaction.setDisableActions(true)
         
         let center = CGPoint(x: bounds.midX, y: bounds.midY)
-        let radius = min(bounds.width, bounds.height) / 2
+        // Increase radius to make the clock face larger (use 98% of available space)
+        let radius = min(bounds.width, bounds.height) / 2 * 0.98
         
         // Face Path
         let facePath = UIBezierPath(ovalIn: CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2))
@@ -134,26 +135,26 @@ class AnalogClockView: UIView {
         
         // Hand Frames (centered initially, then rotated)
         
-        // Hour Hand: shorter and thicker
+        // Hour Hand: shorter and thicker (increased length to match larger face)
         let hourW: CGFloat = 8
-        let hourH: CGFloat = radius * 0.6
+        let hourH: CGFloat = radius * 0.7
         hourHandLayer.bounds = CGRect(x: 0, y: 0, width: hourW, height: hourH)
         hourHandLayer.position = center
         hourHandLayer.anchorPoint = CGPoint(x: 0.5, y: 0.9) // Rotate around near bottom
         
-        // Minute Hand: longer and thinner
+        // Minute Hand: longer and thinner (increased length to match larger face)
         let minW: CGFloat = 4
         let minH: CGFloat = radius * 0.85
         minuteHandLayer.bounds = CGRect(x: 0, y: 0, width: minW, height: minH)
         minuteHandLayer.position = center
         minuteHandLayer.anchorPoint = CGPoint(x: 0.5, y: 0.9)
         
-        // Second Hand: longest and thinnest
+        // Second Hand: longest and thinnest (increased length to match larger face)
         let secW: CGFloat = 2
-        let secH: CGFloat = radius * 0.9
+        let secH: CGFloat = radius * 1
         secondHandLayer.bounds = CGRect(x: 0, y: 0, width: secW, height: secH)
         secondHandLayer.position = center
-        secondHandLayer.anchorPoint = CGPoint(x: 0.5, y: 0.8) // Rotate around near bottom
+        secondHandLayer.anchorPoint = CGPoint(x: 0.5, y: 0.82) // Rotate around near bottom
         
         // Update Center Dot Position
         centerDotLayer.position = center

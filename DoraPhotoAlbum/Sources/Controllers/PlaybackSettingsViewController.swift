@@ -50,11 +50,11 @@ class PlaybackSettingsViewController: UIViewController, UITextFieldDelegate {
         ])
         
         stack.addArrangedSubview(createLabel("幻灯片播放间隔(秒)"))
-        configureField(durationField, placeholder: "10", keyboard: .numberPad)
+        configureField(durationField, placeholder: "\(Int(AppConstants.Defaults.displayDuration))", keyboard: .numberPad)
         stack.addArrangedSubview(durationField)
         
         stack.addArrangedSubview(createLabel("视频最大播放时长(秒, 0不限制)"))
-        configureField(videoDurationField, placeholder: "0", keyboard: .numberPad)
+        configureField(videoDurationField, placeholder: "\(Int(AppConstants.Defaults.videoMaxDuration))", keyboard: .numberPad)
         stack.addArrangedSubview(videoDurationField)
         
         stack.addArrangedSubview(switchRow(title: "视频静音", toggle: videoMutedSwitch))
@@ -117,12 +117,18 @@ class PlaybackSettingsViewController: UIViewController, UITextFieldDelegate {
     @objc private func save() {
         let defaults = UserDefaults.standard
         
-        if let durationText = durationField.text, let duration = Double(durationText) {
+        // Display duration: use default if empty or invalid
+        if let durationText = durationField.text, !durationText.isEmpty, let duration = Double(durationText), duration > 0 {
             defaults.set(duration, forKey: AppConstants.Keys.kDisplayDuration)
+        } else {
+            defaults.set(AppConstants.Defaults.displayDuration, forKey: AppConstants.Keys.kDisplayDuration)
         }
         
-        if let videoDurationText = videoDurationField.text, let videoDuration = Double(videoDurationText) {
+        // Video max duration: use default if empty or invalid
+        if let videoDurationText = videoDurationField.text, !videoDurationText.isEmpty, let videoDuration = Double(videoDurationText), videoDuration >= 0 {
             defaults.set(videoDuration, forKey: AppConstants.Keys.kVideoMaxDuration)
+        } else {
+            defaults.set(AppConstants.Defaults.videoMaxDuration, forKey: AppConstants.Keys.kVideoMaxDuration)
         }
         
         defaults.set(videoMutedSwitch.isOn, forKey: AppConstants.Keys.kVideoMuted)
@@ -138,14 +144,30 @@ class PlaybackSettingsViewController: UIViewController, UITextFieldDelegate {
         let defaults = UserDefaults.standard
         
         let duration = defaults.double(forKey: AppConstants.Keys.kDisplayDuration)
-        durationField.text = duration > 0 ? "\(Int(duration))" : "10"
+        durationField.text = duration > 0 ? "\(Int(duration))" : "\(Int(AppConstants.Defaults.displayDuration))"
         
-        let videoDuration = defaults.double(forKey: AppConstants.Keys.kVideoMaxDuration)
+        let videoDuration: Double
+        if defaults.object(forKey: AppConstants.Keys.kVideoMaxDuration) != nil {
+            videoDuration = defaults.double(forKey: AppConstants.Keys.kVideoMaxDuration)
+        } else {
+            videoDuration = AppConstants.Defaults.videoMaxDuration
+        }
         videoDurationField.text = "\(Int(videoDuration))"
         
-        videoMutedSwitch.isOn = defaults.bool(forKey: AppConstants.Keys.kVideoMuted)
+        // Use default if not set
+        if defaults.object(forKey: AppConstants.Keys.kVideoMuted) == nil {
+            videoMutedSwitch.isOn = AppConstants.Defaults.videoMuted
+        } else {
+            videoMutedSwitch.isOn = defaults.bool(forKey: AppConstants.Keys.kVideoMuted)
+        }
         
-        let contentModeIndex = defaults.integer(forKey: AppConstants.Keys.kContentMode)
+        // Use default if not set
+        let contentModeIndex: Int
+        if defaults.object(forKey: AppConstants.Keys.kContentMode) == nil {
+            contentModeIndex = AppConstants.Defaults.contentMode
+        } else {
+            contentModeIndex = defaults.integer(forKey: AppConstants.Keys.kContentMode)
+        }
         contentModeSegment.selectedSegmentIndex = contentModeIndex
     }
 }

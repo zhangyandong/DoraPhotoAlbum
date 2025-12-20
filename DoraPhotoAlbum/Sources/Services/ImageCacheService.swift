@@ -101,6 +101,7 @@ class ImageCacheService {
         }
         
         // Store in memory cache for faster access
+        // NSCache will automatically evict objects when limits are reached
         memoryCache.setObject(image, forKey: key as NSString)
         return image
     }
@@ -218,6 +219,11 @@ class ImageCacheService {
         formatter.allowedUnits = [.useGB, .useMB, .useKB]
         formatter.countStyle = .file
         return formatter.string(fromByteCount: bytes)
+    }
+    
+    // Clear memory cache only (keeps disk cache)
+    func clearMemoryCache() {
+        memoryCache.removeAllObjects()
     }
     
     // Clear cache (optional method)

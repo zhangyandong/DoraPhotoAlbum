@@ -108,14 +108,37 @@ class ClockSettingsViewController: UIViewController, UITableViewDataSource, UITa
         
         if row == .theme {
             // Theme Selector
-            let currentTheme = UserDefaults.standard.integer(forKey: row.key)
+            let currentTheme: Int
+            if UserDefaults.standard.object(forKey: row.key) != nil {
+                currentTheme = UserDefaults.standard.integer(forKey: row.key)
+            } else {
+                currentTheme = AppConstants.Defaults.clockTheme
+            }
             cell.detailTextLabel?.text = (currentTheme == 0) ? "数字时钟" : "圆盘时钟"
             cell.accessoryType = .disclosureIndicator
             cell.accessoryView = nil
         } else {
             // Switch
             let switchControl = UISwitch()
-            switchControl.isOn = UserDefaults.standard.bool(forKey: row.key)
+            let isOn: Bool
+            if UserDefaults.standard.object(forKey: row.key) != nil {
+                isOn = UserDefaults.standard.bool(forKey: row.key)
+            } else {
+                // Use defaults based on row type
+                switch row {
+                case .startInClockMode:
+                    isOn = AppConstants.Defaults.startInClockMode
+                case .format24Hour:
+                    isOn = AppConstants.Defaults.clockFormat24H
+                case .showSeconds:
+                    isOn = AppConstants.Defaults.clockShowSeconds
+                case .showDate:
+                    isOn = AppConstants.Defaults.clockShowDate
+                default:
+                    isOn = false
+                }
+            }
+            switchControl.isOn = isOn
             switchControl.tag = (indexPath.section * 10) + indexPath.row // Simple tagging
             switchControl.addTarget(self, action: #selector(switchChanged(_:)), for: .valueChanged)
             

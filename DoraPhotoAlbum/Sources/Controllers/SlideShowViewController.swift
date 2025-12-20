@@ -1,6 +1,5 @@
 import UIKit
 import AVFoundation
-import CoreLocation
 import Photos
 import MediaPlayer
 
@@ -40,20 +39,22 @@ class SlideShowViewController: UIViewController {
     // MARK: - Private Properties
     
     // 当前会话内的背景音乐状态，只影响本次运行，不写入 UserDefaults
-    private var isBackgroundMusicOn: Bool = false
+    var isBackgroundMusicOn: Bool = false
     
     private var frontImageView: UIImageView!
     private var backImageView: UIImageView!
-    private var videoLayer: AVPlayerLayer?
-    private var player: AVPlayer?
     private var timer: Timer?
-    private var currentImageRequestId: PHImageRequestID?
-    private var wasMusicPlayingBeforeVideo: Bool = false
+    var wasMusicPlayingBeforeVideo: Bool = false
     private var dashboardView: DashboardView?
-    private var controlsView: UIView?
-    private var controlsTimer: Timer?
+    private var controlsView: SlideshowControlsView?
     private var clockOverlayView: ClockOverlayView?
-    private var isClockMode: Bool = false
+    var isClockMode: Bool = false
+    private var isPaused: Bool = false
+    private var wasPausedByUser: Bool = false // Track if paused manually by user
+    
+    // Managers
+    var imageDisplayManager: ImageDisplayManager?
+    var videoPlayerManager: VideoPlayerManager?
     
     // MARK: - Lifecycle
     
@@ -69,6 +70,10 @@ class SlideShowViewController: UIViewController {
         setupInitialMusicState()
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleMediaSourceChanged), name: .mediaSourceChanged, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleAppDidEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleAppWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleSleepModeChanged), name: .sleepModeChanged, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleMemoryWarning), name: UIApplication.didReceiveMemoryWarningNotification, object: nil)
     }
     
     deinit {
@@ -81,32 +86,38 @@ class SlideShowViewController: UIViewController {
         self.presentingViewController?.dismiss(animated: true)
     }
     
-    private func loadSettings() {
-        let savedDuration = UserDefaults.standard.double(forKey: AppConstants.Keys.kDisplayDuration)
-        if savedDuration > 0 {
-            displayDuration = savedDuration
-        }
-        
-        videoMaxDuration = UserDefaults.standard.double(forKey: AppConstants.Keys.kVideoMaxDuration)
-        isVideoMuted = UserDefaults.standard.object(forKey: AppConstants.Keys.kVideoMuted) as? Bool ?? false
-        playMusicWithVideo = UserDefaults.standard.bool(forKey: AppConstants.Keys.kPlayMusicWithVideo)
-        
-        let contentModeIndex = UserDefaults.standard.integer(forKey: AppConstants.Keys.kContentMode)
-        contentMode = (contentModeIndex == 1) ? .scaleAspectFit : .scaleAspectFill
-        
-        isClockMode = UserDefaults.standard.bool(forKey: AppConstants.Keys.kStartInClockMode)
-    }
-    
     private func setupUI() {
         view.backgroundColor = .black
         setupViews()
+        setupManagers()
         setupDashboard()
         setupClockOverlay()
         setupGestures()
     }
     
+    private func setupManagers() {
+        // Setup ImageDisplayManager
+        imageDisplayManager = ImageDisplayManager(frontImageView: frontImageView, backImageView: backImageView)
+        imageDisplayManager?.delegate = self
+        imageDisplayManager?.contentMode = contentMode
+        
+        // Setup VideoPlayerManager
+        videoPlayerManager = VideoPlayerManager()
+        videoPlayerManager?.delegate = self
+        videoPlayerManager?.isMuted = isVideoMuted
+        videoPlayerManager?.videoMaxDuration = videoMaxDuration
+    }
+    
     private func setupInitialMusicState() {
-        if UserDefaults.standard.bool(forKey: AppConstants.Keys.kPlayBackgroundMusic) {
+        let defaults = UserDefaults.standard
+        let shouldPlayMusic: Bool
+        if defaults.object(forKey: AppConstants.Keys.kPlayBackgroundMusic) != nil {
+            shouldPlayMusic = defaults.bool(forKey: AppConstants.Keys.kPlayBackgroundMusic)
+        } else {
+            shouldPlayMusic = AppConstants.Defaults.playBackgroundMusic
+        }
+        
+        if shouldPlayMusic {
             MusicService.shared.setupMusic()
         }
         isBackgroundMusicOn = MusicService.shared.isPlaying
@@ -154,31 +165,13 @@ class SlideShowViewController: UIViewController {
     }
     
     private func setupControls() {
-        let controls = UIView()
+        let controls = SlideshowControlsView()
+        controls.delegate = self
         controls.translatesAutoresizingMaskIntoConstraints = false
-        controls.alpha = 0 // Initially hidden
         view.addSubview(controls)
         self.controlsView = controls
         
-        let musicBtn = createControlButton(systemName: "music.note", title: "Music", action: #selector(toggleBackgroundMusic))
-        let videoSoundBtn = createControlButton(systemName: "speaker.wave.2.fill", title: "Video", action: #selector(toggleVideoSound))
-        let clockBtn = createControlButton(systemName: "clock.fill", title: "Clock", action: #selector(toggleClockMode))
-        let settingsBtn = createControlButton(systemName: "gearshape.fill", title: "Settings", action: #selector(openSettings))
-        let closeBtn = createControlButton(systemName: "xmark.circle.fill", title: "Close", action: #selector(closeSlideshow))
-        
-        let stack = UIStackView(arrangedSubviews: [musicBtn, videoSoundBtn, clockBtn, settingsBtn, closeBtn])
-        stack.axis = .horizontal
-        let isPad = traitCollection.userInterfaceIdiom == .pad
-        stack.spacing = isPad ? Constants.controlsSpacing : Constants.controlsSpacing * 0.6
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        controls.addSubview(stack)
-        
         NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: controls.topAnchor),
-            stack.bottomAnchor.constraint(equalTo: controls.bottomAnchor),
-            stack.leadingAnchor.constraint(equalTo: controls.leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: controls.trailingAnchor),
-            
             controls.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -Constants.controlsBottomInset),
             controls.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -Constants.controlsTrailingInset)
         ])
@@ -189,26 +182,6 @@ class SlideShowViewController: UIViewController {
         if isPad { return Constants.dashboardWidth }
         // For phones, limit to 55% of screen width, but not exceeding default width
         return min(Constants.dashboardWidth, view.bounds.width * 0.55)
-    }
-    
-    private func createControlButton(systemName: String, title: String, action: Selector) -> UIButton {
-        let button = UIButton(type: .system)
-        button.tintColor = .white
-        button.translatesAutoresizingMaskIntoConstraints = false
-        
-        let isPad = traitCollection.userInterfaceIdiom == .pad
-        let size = isPad ? Constants.buttonSymbolSize : Constants.buttonSymbolSize * 0.8
-        
-        if #available(iOS 13.0, *) {
-            let config = UIImage.SymbolConfiguration(pointSize: size, weight: .medium, scale: .large)
-            button.setImage(UIImage(systemName: systemName, withConfiguration: config), for: .normal)
-        } else {
-            button.setTitle(title, for: .normal)
-            button.titleLabel?.font = UIFont.systemFont(ofSize: size, weight: .bold)
-        }
-        
-        button.addTarget(self, action: action, for: .touchUpInside)
-        return button
     }
     
     // MARK: - Actions
@@ -222,12 +195,12 @@ class SlideShowViewController: UIViewController {
             clock.startUpdating()
             UIView.animate(withDuration: Constants.fadeDuration) {
                 clock.alpha = 1
-                self.dashboardView?.alpha = 0 // Optionally hide dashboard in clock mode
+                // Dashboard remains visible, not affected by clock mode
             }
         } else {
             UIView.animate(withDuration: Constants.fadeDuration, animations: {
                 clock.alpha = 0
-                self.dashboardView?.alpha = 1
+                // Dashboard remains visible, not affected by clock mode
             }) { _ in
                 clock.stopUpdating()
             }
@@ -263,40 +236,6 @@ class SlideShowViewController: UIViewController {
         present(nav, animated: true, completion: nil)
     }
     
-    private func reloadSettings() {
-        loadSettings()
-        
-        // Update clock mode if default changed (optional: currently we keep user's transient state)
-        // If we wanted to enforce setting: isClockMode = UserDefaults.standard.bool(forKey: AppConstants.Keys.kStartInClockMode)
-        // For now, let's just make sure the view updates if formatting changed.
-        // ClockOverlayView listens to notifications, so it handles formatting changes itself.
-        
-        // Update current player if playing
-        player?.isMuted = isVideoMuted
-        
-        // 同步当前会话内背景音乐状态（不改 UserDefaults，只读当前播放状态）
-        isBackgroundMusicOn = MusicService.shared.isPlaying
-        
-        // Update music playback based on settings
-        let shouldPlayMusic = UserDefaults.standard.bool(forKey: AppConstants.Keys.kPlayBackgroundMusic)
-        if shouldPlayMusic {
-            MusicService.shared.setupMusic()
-        } else {
-            MusicService.shared.stop()
-        }
-        
-        // Apply content mode to visible view immediately
-        updateVisibleImageViewContentMode()
-    }
-    
-    private func updateVisibleImageViewContentMode() {
-        if frontImageView.alpha > 0 {
-            frontImageView.contentMode = contentMode
-        } else {
-            backImageView.contentMode = contentMode
-        }
-    }
-    
     /// 切换背景音乐开关（只影响当前会话，不修改 UserDefaults）
     @objc private func toggleBackgroundMusic() {
         isBackgroundMusicOn.toggle()
@@ -310,7 +249,102 @@ class SlideShowViewController: UIViewController {
     /// 切换当前会话内的视频声音（只改内存状态，不改缓存）
     @objc private func toggleVideoSound() {
         isVideoMuted.toggle()
-        player?.isMuted = isVideoMuted
+        videoPlayerManager?.isMuted = isVideoMuted
+    }
+    
+    /// 切换播放/暂停幻灯片
+    @objc private func togglePlayPause() {
+        isPaused.toggle()
+        // Mark as user-initiated: if pausing, user paused it; if resuming, user resumed it
+        wasPausedByUser = isPaused
+        controlsView?.updatePlayPauseButton(isPaused: isPaused)
+        
+        if isPaused {
+            // Pause: stop timer, pause video, and stop Ken Burns animation
+            pausePlayback()
+        } else {
+            // Resume: restart timer or resume video
+            // User manually resumed, so clear the flag
+            wasPausedByUser = false
+            resumePlayback()
+        }
+    }
+    
+    private func pausePlayback() {
+        timer?.invalidate()
+        timer = nil
+        videoPlayerManager?.pause()
+        
+        // Stop Ken Burns animation on current image view
+        imageDisplayManager?.stopAnimations()
+    }
+    
+    private func resumePlayback() {
+        if videoPlayerManager?.getVideoLayer() != nil {
+            // If video is playing, resume it
+            videoPlayerManager?.resume()
+        } else {
+            // If showing image, resume Ken Burns animation and schedule next item
+            if let visibleView = imageDisplayManager?.getCurrentAnimatingView() ?? imageDisplayManager?.getVisibleImageView() {
+                imageDisplayManager?.resumeKenBurnsAnimation(on: visibleView, duration: displayDuration, isPaused: isPaused)
+            }
+            scheduleNextItem()
+        }
+    }
+    
+    @objc private func handleAppDidEnterBackground() {
+        // Pause playback when app enters background
+        // Only pause if not already paused by user
+        if !isPaused {
+            isPaused = true
+            pausePlayback()
+            // Don't update button state, keep it showing pause icon
+            // wasPausedByUser remains false, so we know it was background pause
+        }
+    }
+    
+    @objc private func handleAppWillEnterForeground() {
+        // Resume playback when app returns to foreground
+        // Only resume if it was paused due to background (not manually paused)
+        if isPaused && !wasPausedByUser {
+            isPaused = false
+            wasPausedByUser = false // Clear flag when auto-resuming
+            resumePlayback()
+            controlsView?.updatePlayPauseButton(isPaused: isPaused)
+        }
+    }
+    
+    @objc private func handleSleepModeChanged(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let isSleeping = userInfo["isSleeping"] as? Bool else {
+            return
+        }
+        
+        if isSleeping {
+            // Entering sleep mode: pause playback if not already paused
+            if !isPaused {
+                isPaused = true
+                pausePlayback()
+                // Don't update button state, keep it showing pause icon
+                // wasPausedByUser remains false, so we know it was sleep mode pause
+            }
+        } else {
+            // Exiting sleep mode: resume playback if it was paused by sleep mode
+            if isPaused && !wasPausedByUser {
+                isPaused = false
+                wasPausedByUser = false // Clear flag when auto-resuming
+                resumePlayback()
+                controlsView?.updatePlayPauseButton(isPaused: isPaused)
+            }
+        }
+    }
+    
+    @objc private func handleMemoryWarning() {
+        // Clear images from hidden image views to free memory
+        imageDisplayManager?.clearHiddenImages()
+        
+        // Clear memory cache in ImageCacheService
+        ImageCacheService.shared.clearMemoryCache()
     }
     
     // MARK: - Gestures
@@ -342,13 +376,12 @@ class SlideShowViewController: UIViewController {
     }
     
     @objc private func handleVerticalSwipe(_ gesture: UISwipeGestureRecognizer) {
+        // Only control clock overlay with vertical swipe, not dashboard
+        // guard isClockMode else { return }
+        
         let targetAlpha: CGFloat = (gesture.direction == .down) ? 0 : 1
         UIView.animate(withDuration: Constants.fadeDuration) {
-            if self.isClockMode {
-                self.clockOverlayView?.alpha = targetAlpha
-            } else {
-                self.dashboardView?.alpha = targetAlpha
-            }
+            self.clockOverlayView?.alpha = targetAlpha
         }
     }
     
@@ -383,8 +416,16 @@ class SlideShowViewController: UIViewController {
     }
     
     @objc private func handleSwipe(_ gesture: UISwipeGestureRecognizer) {
-        stopVideo()
+        // Stop video and clear any pending video loads immediately
+        videoPlayerManager?.stopVideo()
         timer?.invalidate()
+        
+        // Stop any ongoing Ken Burns animation when swiping
+        imageDisplayManager?.stopAnimations()
+        
+        // Cancel any pending image request before showing next item
+        // This prevents showing wrong image when quickly swiping
+        imageDisplayManager?.cancelImageRequest()
         
         if gesture.direction == .left {
             showNextItem()
@@ -397,23 +438,16 @@ class SlideShowViewController: UIViewController {
     // MARK: - Dashboard Updates
     
     private func updateDashboard(for item: UnifiedMediaItem) {
-        dashboardView?.updateFileType(item.type)
-        
-        var locName: String? = item.locationName
-        
-        if let asset = item.localAsset, let loc = asset.location, locName == nil {
-            CLGeocoder().reverseGeocodeLocation(loc) { [weak self] placemarks, _ in
-                locName = placemarks?.first?.locality
-                DispatchQueue.main.async {
-                    self?.dashboardView?.updatePhotoMeta(date: item.creationDate, location: locName)
-                }
-            }
-        } else {
-            dashboardView?.updatePhotoMeta(date: item.creationDate, location: locName)
-        }
+        dashboardView?.updatePhotoMeta(item)
     }
     
     // MARK: - View Lifecycle
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update video layer frame when layout changes (e.g., rotation)
+        videoPlayerManager?.updateFrame(view.bounds)
+    }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -431,19 +465,16 @@ class SlideShowViewController: UIViewController {
     private func cleanup() {
         timer?.invalidate()
         timer = nil
-        controlsTimer?.invalidate()
-        controlsTimer = nil
-        stopVideo(resumeMusic: false)
+        videoPlayerManager?.stopVideo()
         MusicService.shared.stop()
         clockOverlayView?.stopUpdating()
-        cancelImageRequest()
-    }
-    
-    private func cancelImageRequest() {
-        if let requestId = currentImageRequestId {
-            PHImageManager.default().cancelImageRequest(requestId)
-            currentImageRequestId = nil
-        }
+        imageDisplayManager?.cancelImageRequest()
+        
+        // Clear images from image views to free memory
+        imageDisplayManager?.clearAllImages()
+        
+        // Clear memory cache when leaving slideshow
+        ImageCacheService.shared.clearMemoryCache()
     }
     
     private func setupViews() {
@@ -470,30 +501,7 @@ class SlideShowViewController: UIViewController {
     }
     
     @objc private func handleTap() {
-        guard let controls = controlsView else { return }
-        
-        controlsTimer?.invalidate()
-        
-        let targetAlpha: CGFloat = (controls.alpha == 0) ? 1.0 : 0.0
-        
-        UIView.animate(withDuration: Constants.fadeDuration) {
-            controls.alpha = targetAlpha
-        } completion: { [weak self] _ in
-            if targetAlpha == 1.0 {
-                self?.startControlsTimer()
-            }
-        }
-    }
-    
-    private func startControlsTimer() {
-        controlsTimer = Timer.scheduledTimer(withTimeInterval: Constants.controlsAutoHideDelay, repeats: false) { [weak self] _ in
-            guard let self = self, let controls = self.controlsView else { return }
-            if controls.alpha == 1 {
-                UIView.animate(withDuration: Constants.fadeDuration) {
-                    controls.alpha = 0
-                }
-            }
-        }
+        controlsView?.toggleVisibility()
     }
     
     private func showNextItem() {
@@ -541,180 +549,53 @@ class SlideShowViewController: UIViewController {
     
     private func showImage(item: UnifiedMediaItem) {
         updateDashboard(for: item)
-        stopVideo()
-        cancelImageRequest()
-        
-        prepareImageViewsForTransition()
+        videoPlayerManager?.stopVideo()
+        imageDisplayManager?.cancelImageRequest()
         
         let phContentMode: PHImageContentMode = (contentMode == .scaleAspectFit) ? .aspectFit : .aspectFill
         let scale = UIScreen.main.scale
         let targetSize = CGSize(width: view.bounds.width * scale, height: view.bounds.height * scale)
+        let kenBurnsDuration = displayDuration + Constants.transitionDuration
         
-        currentImageRequestId = PhotoService.shared.requestImage(for: item, targetSize: targetSize, contentMode: phContentMode) { [weak self] image in
-            guard let self = self else { return }
-            self.currentImageRequestId = nil
-            
-            guard let image = image else {
-                DispatchQueue.main.async {
-                    self.showNextItem()
-                }
-                return
-            }
-            
-            DispatchQueue.main.async {
-                self.displayImage(image)
-            }
-        }
-    }
-    
-    private func prepareImageViewsForTransition() {
-        // If both imageViews are hidden (coming from video), clear old images and reset state
-        if frontImageView.alpha == 0 && backImageView.alpha == 0 {
-            frontImageView.image = nil
-            backImageView.image = nil
-            frontImageView.transform = .identity
-            backImageView.transform = .identity
-            backImageView.alpha = 0
-        }
-    }
-    
-    private func displayImage(_ image: UIImage) {
-        guard let frontImageView = frontImageView, let backImageView = backImageView else { return }
-        
-        let incomingView = (frontImageView.alpha == 0) ? frontImageView : backImageView
-        let outgoingView = (incomingView == frontImageView) ? backImageView : frontImageView
-        
-        incomingView.image = image
-        incomingView.contentMode = contentMode
-        incomingView.transform = .identity
-        incomingView.alpha = 0
-        outgoingView.alpha = 1
-        
-        performTransition(incoming: incomingView, outgoing: outgoingView)
-        scheduleNextItem()
+        imageDisplayManager?.showImage(
+            item: item,
+            targetSize: targetSize,
+            contentMode: phContentMode,
+            kenBurnsDuration: kenBurnsDuration,
+            transitionDuration: Constants.transitionDuration,
+            isPaused: isPaused
+        )
     }
     
     private func scheduleNextItem() {
+        guard !isPaused else { return } // Don't schedule if paused
+        
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: displayDuration, repeats: false) { [weak self] _ in
-            self?.showNextItem()
+            guard let self = self, !self.isPaused else { return } // Check again before showing next
+            self.showNextItem()
         }
     }
     
-    private func performTransition(incoming: UIView, outgoing: UIView) {
-        // Ensure initial state
-        incoming.alpha = 0
-        outgoing.alpha = 1
-        incoming.transform = .identity
-        
-        // Start Ken Burns animation on incoming view
-        let animationDuration = displayDuration + Constants.transitionDuration
-        startKenBurns(view: incoming, duration: animationDuration, startRandomly: true)
-        
-        // Fade transition
-        UIView.animate(withDuration: Constants.transitionDuration, animations: {
-            incoming.alpha = 1
-            outgoing.alpha = 0
-        }) { _ in
-            // Reset outgoing transform only after it's fully hidden
-            outgoing.transform = .identity
-        }
-    }
-    
-    // MARK: - Ken Burns Animation
-    
-    private func startKenBurns(view: UIView, duration: TimeInterval, startRandomly: Bool) {
-        let endScale = CGFloat.random(in: Constants.kenBurnsScaleRange)
-        
-        if startRandomly {
-            let startScale = CGFloat.random(in: Constants.kenBurnsScaleRange)
-            let startTranslation = randomTranslation(for: startScale, in: view.bounds.size)
-            // Apply scale then translate. Since translatedBy applies to the existing transform (scale),
-            // we need to divide dx by s to get desired screen translation.
-            let startTransform = CGAffineTransform(scaleX: startScale, y: startScale)
-                .translatedBy(x: startTranslation.x / startScale, y: startTranslation.y / startScale)
-            view.transform = startTransform
-        }
-        
-        let endTranslation = randomTranslation(for: endScale, in: view.bounds.size)
-        let endTransform = CGAffineTransform(scaleX: endScale, y: endScale)
-            .translatedBy(x: endTranslation.x / endScale, y: endTranslation.y / endScale)
-
-        UIView.animate(withDuration: duration, delay: 0, options: .curveLinear, animations: {
-            view.transform = endTransform
-        }, completion: nil)
-    }
-    
-    private func randomTranslation(for scale: CGFloat, in size: CGSize) -> CGPoint {
-        guard scale > 1.0 else { return .zero }
-        
-        let maxOffX = ((size.width * scale - size.width) / 2) * Constants.kenBurnsSafetyFactor
-        let maxOffY = ((size.height * scale - size.height) / 2) * Constants.kenBurnsSafetyFactor
-        
-        return CGPoint(
-            x: CGFloat.random(in: -maxOffX...maxOffX),
-            y: CGFloat.random(in: -maxOffY...maxOffY)
-        )
-    }
     
     // MARK: - Video Playback
     
     private func playVideo(item: UnifiedMediaItem) {
         updateDashboard(for: item)
         captureMusicStateBeforeVideo()
-        stopVideo(resumeMusic: false)
         
-        PhotoService.shared.requestPlayerItem(for: item) { [weak self] playerItem in
-            guard let self = self, let playerItem = playerItem else {
-                print("SlideShowViewController: Failed to load video, skipping to next")
-                DispatchQueue.main.async {
-                    self?.showNextItem()
-                }
-                return
-            }
-            DispatchQueue.main.async {
-                self.setupAndPlayVideo(item: playerItem)
-            }
-        }
+        imageDisplayManager?.hideImageViews(animated: true, duration: Constants.videoHideDuration)
+        bringUIElementsToFront()
+        handleMusicDuringVideo()
+        
+        videoPlayerManager?.playVideo(item: item, in: view, itemId: item.id)
     }
     
     private func captureMusicStateBeforeVideo() {
-        guard player == nil else { return }
-        
         if !playMusicWithVideo {
             wasMusicPlayingBeforeVideo = isBackgroundMusicOn
         } else {
             wasMusicPlayingBeforeVideo = false
-        }
-    }
-    
-    private func setupAndPlayVideo(item: AVPlayerItem) {
-        player = AVPlayer(playerItem: item)
-        player?.isMuted = isVideoMuted
-        
-        videoLayer = AVPlayerLayer(player: player)
-        videoLayer?.frame = view.bounds
-        videoLayer?.videoGravity = .resizeAspect
-        videoLayer?.backgroundColor = UIColor.black.cgColor
-        
-        hideImageViewsForVideo()
-        
-        if let layer = videoLayer {
-            view.layer.addSublayer(layer)
-        }
-        
-        bringUIElementsToFront()
-        handleMusicDuringVideo()
-        
-        player?.play()
-        observeVideoCompletion(item: item)
-        scheduleVideoMaxDuration()
-    }
-    
-    private func hideImageViewsForVideo() {
-        UIView.animate(withDuration: Constants.videoHideDuration) {
-            self.frontImageView.alpha = 0
-            self.backImageView.alpha = 0
         }
     }
     
@@ -739,39 +620,6 @@ class SlideShowViewController: UIViewController {
         }
     }
     
-    private func observeVideoCompletion(item: AVPlayerItem) {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(videoDidFinish),
-            name: .AVPlayerItemDidPlayToEndTime,
-            object: item
-        )
-    }
-    
-    private func scheduleVideoMaxDuration() {
-        timer?.invalidate()
-        if videoMaxDuration > 0 {
-            timer = Timer.scheduledTimer(withTimeInterval: videoMaxDuration, repeats: false) { [weak self] _ in
-                self?.videoDidFinish()
-            }
-        }
-    }
-    
-    @objc private func videoDidFinish() {
-        stopVideo()
-        showNextItem()
-    }
-    
-    private func stopVideo(resumeMusic: Bool = true) {
-        player?.pause()
-        player = nil
-        videoLayer?.removeFromSuperlayer()
-        videoLayer = nil
-        NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: nil)
-        
-        resumeMusicAfterVideo(resumeMusic: resumeMusic)
-    }
-    
     private func resumeMusicAfterVideo(resumeMusic: Bool) {
         if playMusicWithVideo {
             // 如果允许"视频期间继续背景音乐"：根据当前会话内开关状态决定是否确保音乐在播放
@@ -786,6 +634,73 @@ class SlideShowViewController: UIViewController {
             MusicService.shared.play()
             isBackgroundMusicOn = true
         }
+    }
+}
+
+// MARK: - ImageDisplayManagerDelegate
+
+extension SlideShowViewController: ImageDisplayManagerDelegate {
+    func imageDisplayManager(_ manager: ImageDisplayManager, didDisplayImage image: UIImage) {
+        scheduleNextItem()
+    }
+    
+    func imageDisplayManager(_ manager: ImageDisplayManager, didFailToLoad item: UnifiedMediaItem) {
+        showNextItem()
+    }
+}
+
+// MARK: - VideoPlayerManagerDelegate
+
+extension SlideShowViewController: VideoPlayerManagerDelegate {
+    func videoPlayerManager(_ manager: VideoPlayerManager, didStartPlaying item: AVPlayerItem) {
+        // Video started playing successfully
+        // Ensure UI elements are on top of video layer after it's added
+        bringUIElementsToFront()
+        
+        // Ensure dashboard is visible when playing video (unless in clock mode)
+        if !isClockMode {
+            dashboardView?.alpha = 1
+        }
+    }
+    
+    func videoPlayerManager(_ manager: VideoPlayerManager, didFailToLoad item: UnifiedMediaItem) {
+        showNextItem()
+    }
+    
+    func videoPlayerManagerDidFinish(_ manager: VideoPlayerManager) {
+        resumeMusicAfterVideo(resumeMusic: true)
+        // Only show next item if not paused
+        if !isPaused {
+            showNextItem()
+        }
+    }
+}
+
+// MARK: - SlideshowControlsViewDelegate
+
+extension SlideShowViewController: SlideshowControlsViewDelegate {
+    func slideshowControlsViewDidTapPlayPause(_ view: SlideshowControlsView) {
+        togglePlayPause()
+    }
+    
+    func slideshowControlsViewDidTapMusic(_ view: SlideshowControlsView) {
+        toggleBackgroundMusic()
+    }
+    
+    func slideshowControlsViewDidTapVideoSound(_ view: SlideshowControlsView) {
+        toggleVideoSound()
+    }
+    
+    func slideshowControlsViewDidTapClock(_ view: SlideshowControlsView) {
+        toggleClockMode()
+    }
+    
+    func slideshowControlsViewDidTapSettings(_ view: SlideshowControlsView) {
+        openSettings()
+    }
+    
+    func slideshowControlsViewDidTapClose(_ view: SlideshowControlsView) {
+        closeSlideshow()
     }
 }
 

@@ -6,6 +6,7 @@ class MusicService {
     private var musicPlayer: MPMusicPlayerController?
     private var currentPlaylistName: String?
     private var hasInitializedQueue = false
+    private var wasPlayingBeforeSleep = false // Track if music was playing before sleep
     
     // Playback Modes
     enum PlaybackMode: Int {
@@ -14,7 +15,45 @@ class MusicService {
         case singleLoop = 2
     }
     
-    private init() {}
+    private init() {
+        setupSleepModeObserver()
+    }
+    
+    private func setupSleepModeObserver() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleSleepModeChanged),
+            name: .sleepModeChanged,
+            object: nil
+        )
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    @objc private func handleSleepModeChanged(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let isSleeping = userInfo["isSleeping"] as? Bool else {
+            return
+        }
+        
+        if isSleeping {
+            // Entering sleep mode: pause music if playing
+            if isPlaying {
+                wasPlayingBeforeSleep = true
+                pause()
+            } else {
+                wasPlayingBeforeSleep = false
+            }
+        } else {
+            // Exiting sleep mode: resume music if it was playing before sleep
+            if wasPlayingBeforeSleep {
+                play()
+                wasPlayingBeforeSleep = false
+            }
+        }
+    }
     
     func setupMusic() {
         MPMediaLibrary.requestAuthorization { status in
@@ -32,11 +71,48 @@ class MusicService {
     }
     
     func updatePlaybackConfiguration() {
+        updateConfigurationOnly()
+        
+        // Auto-play based on settings (used in SlideShowViewController)
+        guard let player = musicPlayer else { return }
+        let defaults = UserDefaults.standard
+        let shouldPlayMusic: Bool
+        if defaults.object(forKey: AppConstants.Keys.kPlayBackgroundMusic) != nil {
+            shouldPlayMusic = defaults.bool(forKey: AppConstants.Keys.kPlayBackgroundMusic)
+        } else {
+            shouldPlayMusic = AppConstants.Defaults.playBackgroundMusic
+        }
+        
+        if shouldPlayMusic {
+             if player.playbackState != .playing {
+                 player.play()
+             }
+        } else {
+             player.pause()
+        }
+    }
+    
+    func updateConfigurationOnly() {
+        // Only update configuration if player is already initialized
+        // Don't initialize player here - that should only happen in SlideShowViewController
         guard let player = musicPlayer else { return }
         
         let defaults = UserDefaults.standard
-        let playlistName = defaults.string(forKey: AppConstants.Keys.kSelectedPlaylist)
-        let modeInt = defaults.integer(forKey: AppConstants.Keys.kMusicPlaybackMode)
+        
+        // Use defaults if not set
+        let playlistName: String?
+        if defaults.object(forKey: AppConstants.Keys.kSelectedPlaylist) != nil {
+            playlistName = defaults.string(forKey: AppConstants.Keys.kSelectedPlaylist)
+        } else {
+            playlistName = AppConstants.Defaults.selectedPlaylist
+        }
+        
+        let modeInt: Int
+        if defaults.object(forKey: AppConstants.Keys.kMusicPlaybackMode) != nil {
+            modeInt = defaults.integer(forKey: AppConstants.Keys.kMusicPlaybackMode)
+        } else {
+            modeInt = AppConstants.Defaults.musicPlaybackMode
+        }
         let mode = PlaybackMode(rawValue: modeInt) ?? .sequential
         
         // 1. Set Queue only if changed or first time
@@ -58,6 +134,7 @@ class MusicService {
             } else {
                 player.setQueue(with: MPMediaQuery.songs())
             }
+            // Only prepare, don't play
             player.prepareToPlay()
         }
         
@@ -74,13 +151,8 @@ class MusicService {
             player.repeatMode = .one
         }
         
-        if defaults.bool(forKey: AppConstants.Keys.kPlayBackgroundMusic) {
-             if player.playbackState != .playing {
-                 player.play()
-             }
-        } else {
-             player.pause()
-        }
+        // Explicitly ensure we don't auto-play here
+        // This method is called from settings, not from playback view
     }
     
     func play() {

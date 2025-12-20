@@ -143,6 +143,10 @@ class LocalAlbumSettingsViewController: UIViewController {
         }
     }
     
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
     @objc private func save() {
         let defaults = UserDefaults.standard
         defaults.set(enableSwitch.isOn, forKey: AppConstants.Keys.kLocalAlbumEnabled)

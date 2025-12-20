@@ -69,8 +69,6 @@ class WebDAVClient: NSObject, XMLParserDelegate {
             return
         }
         
-        print("WebDAV: Listing directory at \(url.absoluteString)")
-        
         var request = URLRequest(url: url)
         request.httpMethod = "PROPFIND"
         request.addValue("1", forHTTPHeaderField: "Depth")
@@ -106,7 +104,6 @@ class WebDAVClient: NSObject, XMLParserDelegate {
             
             // Check HTTP status
             if let httpResponse = response as? HTTPURLResponse {
-                print("WebDAV HTTP Status: \(httpResponse.statusCode)")
                 if httpResponse.statusCode != 200 && httpResponse.statusCode != 207 {
                     print("WebDAV HTTP Error: \(httpResponse.statusCode)")
                     if let responseString = String(data: data, encoding: .utf8) {
@@ -119,17 +116,7 @@ class WebDAVClient: NSObject, XMLParserDelegate {
                 }
             }
             
-            // Debug: Print raw response
-            if let responseString = String(data: data, encoding: .utf8) {
-                print("WebDAV Raw Response (first 1000 chars): \(String(responseString.prefix(1000)))")
-            }
-            
             self.parseWebDAVResponse(data) { resources in
-                print("WebDAV: Parsed \(resources.count) resources")
-                for (index, res) in resources.enumerated() {
-                    print("  [\(index)] href: \(res.href), isDir: \(res.isDirectory), type: \(res.contentType)")
-                }
-                
                 // Filter out the current directory itself
                 // Handle both absolute and relative hrefs
                 let filtered = resources.filter { res in
@@ -147,13 +134,11 @@ class WebDAVClient: NSObject, XMLParserDelegate {
                     
                     // Skip if it's the current directory itself
                     if normalizedHref == normalizedPath || normalizedHref == cleanPath || hrefPath == cleanPath {
-                        print("  Filtering out self-reference: \(res.href)")
                         return false
                     }
                     return true
                 }
                 
-                print("WebDAV: After filtering, \(filtered.count) resources")
                 DispatchQueue.main.async {
                     completion(filtered)
                 }
@@ -224,8 +209,6 @@ class WebDAVClient: NSObject, XMLParserDelegate {
             return
         }
         
-        print("WebDAV listDirectory: Listing directory at \(url.absoluteString)")
-        
         var request = URLRequest(url: url)
         request.httpMethod = "PROPFIND"
         request.addValue("1", forHTTPHeaderField: "Depth") // Depth 1 to get immediate children
@@ -263,9 +246,6 @@ class WebDAVClient: NSObject, XMLParserDelegate {
                 return
             }
             
-            print("WebDAV listDirectory HTTP Status: \(httpResponse.statusCode)")
-            print("WebDAV listDirectory Response Headers: \(httpResponse.allHeaderFields)")
-            
             // Check for successful status codes
             guard httpResponse.statusCode == 200 || httpResponse.statusCode == 207 else {
                 print("WebDAV listDirectory HTTP Error: \(httpResponse.statusCode)")
@@ -293,13 +273,6 @@ class WebDAVClient: NSObject, XMLParserDelegate {
                 return
             }
             
-            print("WebDAV listDirectory: Received \(data.count) bytes (Content-Length: \(contentLength))")
-            
-            // Debug: Print raw response
-            if let responseString = String(data: data, encoding: .utf8) {
-                print("WebDAV listDirectory Raw Response (first 1000 chars): \(String(responseString.prefix(1000)))")
-            }
-            
             // Check for self before parsing
             guard let self = self else {
                 print("WebDAV listDirectory: Self is nil (WebDAVClient was deallocated)")
@@ -310,11 +283,6 @@ class WebDAVClient: NSObject, XMLParserDelegate {
             }
             
             self.parseWebDAVResponse(data) { resources in
-                print("WebDAV listDirectory: Parsed \(resources.count) resources")
-                for (index, res) in resources.enumerated() {
-                    print("  [\(index)] href: \(res.href), isDir: \(res.isDirectory), type: \(res.contentType)")
-                }
-                
                 // Filter out the current directory itself
                 let filtered = resources.filter { res in
                     var hrefPath = res.href
@@ -331,18 +299,14 @@ class WebDAVClient: NSObject, XMLParserDelegate {
                     
                     // Skip if it's the current directory itself
                     if normalizedHref == normalizedPath || normalizedHref == cleanPath || hrefPath == cleanPath {
-                        print("  Filtering out self-reference: \(res.href)")
                         return false
                     }
                     return true
                 }
                 
-                print("WebDAV listDirectory: After filtering, \(filtered.count) resources")
-                
                 let items = filtered.compactMap { res -> UnifiedMediaItem? in
                     // Skip directories
                     if res.isDirectory { 
-                        print("  Skipping directory: \(res.href)")
                         return nil 
                     }
                     
@@ -375,11 +339,8 @@ class WebDAVClient: NSObject, XMLParserDelegate {
                         return nil
                     }
                     
-                    print("  Creating UnifiedMediaItem: \(itemURL.absoluteString), type: \(type)")
                     return UnifiedMediaItem(url: itemURL, type: type, date: res.lastModified)
                 }
-                
-                print("WebDAV listDirectory: Created \(items.count) UnifiedMediaItems from \(cleanPath)")
                 
                 // Collect all items so far
                 var collectedItems = allItems
@@ -387,11 +348,9 @@ class WebDAVClient: NSObject, XMLParserDelegate {
                 
                 // Find all subdirectories to recurse into
                 let subdirectories = filtered.filter { $0.isDirectory }
-                print("WebDAV listDirectory: Found \(subdirectories.count) subdirectories in \(cleanPath)")
                 
                 // If no subdirectories, we're done
                 guard !subdirectories.isEmpty else {
-                    print("WebDAV listDirectory: No subdirectories, returning \(collectedItems.count) total items")
                     DispatchQueue.main.async {
                         completion(collectedItems)
                     }
@@ -424,8 +383,6 @@ class WebDAVClient: NSObject, XMLParserDelegate {
                         subdirPath = String(subdirPath.dropLast())
                     }
                     
-                    print("WebDAV listDirectory: Recursing into subdirectory: \(subdirPath)")
-                    
                     // Pass empty array to subdirectory, it will return its own items
                     self.listDirectoryRecursive(path: subdirPath, allItems: [], completion: { subItems in
                         itemsLock.lock()
@@ -438,7 +395,6 @@ class WebDAVClient: NSObject, XMLParserDelegate {
                 
                 // Wait for all subdirectories to complete
                 dispatchGroup.notify(queue: .main) {
-                    print("WebDAV listDirectory: Completed recursive scan, total items: \(finalItems.count)")
                     completion(finalItems)
                 }
             }

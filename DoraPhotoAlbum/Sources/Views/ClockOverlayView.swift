@@ -9,13 +9,30 @@ class ClockOverlayView: UIView {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textColor = .white
         label.textAlignment = .center
-        label.font = UIFont.monospacedDigitSystemFont(ofSize: 160, weight: .bold)
+        
+        // Use a more elegant font - SF Rounded on iOS 13+, monospaced on iOS 12
+        if #available(iOS 13.0, *) {
+            // SF Rounded for a softer, more modern look
+            let font = UIFont.systemFont(ofSize: 160, weight: .medium)
+            let descriptor = font.fontDescriptor.withDesign(.rounded) ?? font.fontDescriptor
+            label.font = UIFont(descriptor: descriptor, size: 160)
+        } else {
+            // Fallback to monospaced digit font for iOS 12
+            label.font = UIFont.monospacedDigitSystemFont(ofSize: 160, weight: .medium)
+        }
+        
         label.layer.shadowColor = UIColor.black.cgColor
         label.layer.shadowOffset = CGSize(width: 2, height: 2)
         label.layer.shadowOpacity = 0.8
         label.layer.shadowRadius = 4
         label.adjustsFontSizeToFitWidth = true
         label.minimumScaleFactor = 0.3
+        
+        // Add letter spacing for better readability
+        if #available(iOS 13.0, *) {
+            // Letter spacing is handled via attributed string if needed
+        }
+        
         return label
     }()
     
@@ -24,7 +41,16 @@ class ClockOverlayView: UIView {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textColor = .white
         label.textAlignment = .center
-        label.font = UIFont.systemFont(ofSize: 40, weight: .medium)
+        
+        // Use SF Rounded on iOS 13+, system font on iOS 12
+        if #available(iOS 13.0, *) {
+            let font = UIFont.systemFont(ofSize: 40, weight: .medium)
+            let descriptor = font.fontDescriptor.withDesign(.rounded) ?? font.fontDescriptor
+            label.font = UIFont(descriptor: descriptor, size: 40)
+        } else {
+            label.font = UIFont.systemFont(ofSize: 40, weight: .medium)
+        }
+        
         label.layer.shadowColor = UIColor.black.cgColor
         label.layer.shadowOffset = CGSize(width: 1, height: 1)
         label.layer.shadowOpacity = 0.8
@@ -129,7 +155,12 @@ class ClockOverlayView: UIView {
     
     @objc private func handleSwipe(_ gesture: UISwipeGestureRecognizer) {
         // Toggle theme
-        let currentTheme = UserDefaults.standard.integer(forKey: AppConstants.Keys.kClockTheme)
+        let currentTheme: Int
+        if UserDefaults.standard.object(forKey: AppConstants.Keys.kClockTheme) != nil {
+            currentTheme = UserDefaults.standard.integer(forKey: AppConstants.Keys.kClockTheme)
+        } else {
+            currentTheme = AppConstants.Defaults.clockTheme
+        }
         let newTheme = (currentTheme == 0) ? 1 : 0
         UserDefaults.standard.set(newTheme, forKey: AppConstants.Keys.kClockTheme)
         
@@ -145,7 +176,10 @@ class ClockOverlayView: UIView {
         stopUpdating()
         updateTime()
         // Update every second
-        timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateTime), userInfo: nil, repeats: true)
+        // Use weak self to avoid retain cycle
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.updateTime()
+        }
     }
     
     func stopUpdating() {
@@ -154,10 +188,21 @@ class ClockOverlayView: UIView {
     }
     
     @objc private func updateSettings() {
-        let showDate = UserDefaults.standard.bool(forKey: AppConstants.Keys.kClockShowDate)
+        let showDate: Bool
+        if UserDefaults.standard.object(forKey: AppConstants.Keys.kClockShowDate) != nil {
+            showDate = UserDefaults.standard.bool(forKey: AppConstants.Keys.kClockShowDate)
+        } else {
+            showDate = AppConstants.Defaults.clockShowDate
+        }
         dateLabel.isHidden = !showDate
         
-        let theme = UserDefaults.standard.integer(forKey: AppConstants.Keys.kClockTheme)
+        let theme: Int
+        if UserDefaults.standard.object(forKey: AppConstants.Keys.kClockTheme) != nil {
+            theme = UserDefaults.standard.integer(forKey: AppConstants.Keys.kClockTheme)
+        } else {
+            theme = AppConstants.Defaults.clockTheme
+        }
+        
         if theme == 1 {
             // Analog Mode
             timeLabel.isHidden = true
@@ -207,8 +252,19 @@ class ClockOverlayView: UIView {
         }
         
         // Always update digital components as they might be toggled visible
-        let is24Hour = UserDefaults.standard.bool(forKey: AppConstants.Keys.kClockFormat24H)
-        let showSeconds = UserDefaults.standard.bool(forKey: AppConstants.Keys.kClockShowSeconds)
+        let is24Hour: Bool
+        if UserDefaults.standard.object(forKey: AppConstants.Keys.kClockFormat24H) != nil {
+            is24Hour = UserDefaults.standard.bool(forKey: AppConstants.Keys.kClockFormat24H)
+        } else {
+            is24Hour = AppConstants.Defaults.clockFormat24H
+        }
+        
+        let showSeconds: Bool
+        if UserDefaults.standard.object(forKey: AppConstants.Keys.kClockShowSeconds) != nil {
+            showSeconds = UserDefaults.standard.bool(forKey: AppConstants.Keys.kClockShowSeconds)
+        } else {
+            showSeconds = AppConstants.Defaults.clockShowSeconds
+        }
         
         // Time Format
         let timeFormatter = DateFormatter()
@@ -217,7 +273,12 @@ class ClockOverlayView: UIView {
         } else {
             timeFormatter.dateFormat = showSeconds ? "h:mm:ss a" : "h:mm a"
         }
-        timeLabel.text = timeFormatter.string(from: now)
+        let timeString = timeFormatter.string(from: now)
+        
+        // Apply letter spacing for better readability (kern is available in iOS 12+)
+        let attributedString = NSMutableAttributedString(string: timeString)
+        attributedString.addAttribute(.kern, value: 2.0, range: NSRange(location: 0, length: timeString.count))
+        timeLabel.attributedText = attributedString
         
         // Date Format
         if !dateLabel.isHidden {
@@ -247,8 +308,22 @@ class ClockOverlayView: UIView {
         let clampedDateSize = max(16, min(targetDateSize, isPad ? 50 : 30))
         
         if timeLabel.font.pointSize != clampedTimeSize {
-            timeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: clampedTimeSize, weight: .bold)
-            dateLabel.font = UIFont.systemFont(ofSize: clampedDateSize, weight: .medium)
+            // Update font with better styling
+            if #available(iOS 13.0, *) {
+                // Use SF Rounded with medium weight
+                let font = UIFont.systemFont(ofSize: clampedTimeSize, weight: .medium)
+                let descriptor = font.fontDescriptor.withDesign(.rounded) ?? font.fontDescriptor
+                timeLabel.font = UIFont(descriptor: descriptor, size: clampedTimeSize)
+                
+                // Update date label with SF Rounded
+                let dateFont = UIFont.systemFont(ofSize: clampedDateSize, weight: .medium)
+                let dateDescriptor = dateFont.fontDescriptor.withDesign(.rounded) ?? dateFont.fontDescriptor
+                dateLabel.font = UIFont(descriptor: dateDescriptor, size: clampedDateSize)
+            } else {
+                // Fallback to monospaced digit font for iOS 12
+                timeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: clampedTimeSize, weight: .medium)
+                dateLabel.font = UIFont.systemFont(ofSize: clampedDateSize, weight: .medium)
+            }
         }
     }
 }

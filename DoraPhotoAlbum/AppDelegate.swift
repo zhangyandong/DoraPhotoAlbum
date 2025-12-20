@@ -33,7 +33,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.makeKeyAndVisible()
         return true
     }
-
+    
+    func applicationDidEnterBackground(_ application: UIApplication) {
+        // Pause background music when app enters background
+        MusicService.shared.pause()
+    }
+    
+    func applicationWillEnterForeground(_ application: UIApplication) {
+        // Optionally resume music when app returns to foreground
+        // Only if background music is enabled in settings
+        let defaults = UserDefaults.standard
+        let shouldPlayMusic: Bool
+        if defaults.object(forKey: AppConstants.Keys.kPlayBackgroundMusic) != nil {
+            shouldPlayMusic = defaults.bool(forKey: AppConstants.Keys.kPlayBackgroundMusic)
+        } else {
+            shouldPlayMusic = AppConstants.Defaults.playBackgroundMusic
+        }
+        
+        if shouldPlayMusic {
+            MusicService.shared.play()
+        }
+    }
 
 }
 

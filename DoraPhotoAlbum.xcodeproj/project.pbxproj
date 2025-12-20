@@ -21,7 +21,6 @@
 		F55144312EF5027A001835A0 /* MusicService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144262EF5027A001835A0 /* MusicService.swift */; };
 		F55144322EF5027A001835A0 /* PhotoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144272EF5027A001835A0 /* PhotoService.swift */; };
 		F55144332EF5027A001835A0 /* SlideShowViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551441F2EF5027A001835A0 /* SlideShowViewController.swift */; };
-		F55144342EF5027A001835A0 /* BackgroundMusicSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551441C2EF5027A001835A0 /* BackgroundMusicSettingsViewController.swift */; };
 		F55144352EF5027A001835A0 /* MediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144222EF5027A001835A0 /* MediaItem.swift */; };
 		F55144362EF5027A001835A0 /* SchedulerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144282EF5027A001835A0 /* SchedulerService.swift */; };
 		F55144372EF5027A001835A0 /* WebDAVBrowserViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144202EF5027A001835A0 /* WebDAVBrowserViewController.swift */; };
@@ -30,7 +29,6 @@
 		F551443A2EF5027A001835A0 /* WebDAVClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144292EF5027A001835A0 /* WebDAVClient.swift */; };
 		F551443B2EF5027A001835A0 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551442D2EF5027A001835A0 /* Constants.swift */; };
 		F551443C2EF5027A001835A0 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551441E2EF5027A001835A0 /* SettingsViewController.swift */; };
-		F551443E2EF5045F001835A0 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551443D2EF5045F001835A0 /* SceneDelegate.swift */; };
 		F55144432EF51A25001835A0 /* CacheSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551443F2EF51A25001835A0 /* CacheSettingsViewController.swift */; };
 		F55144442EF51A25001835A0 /* ScheduleSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144412EF51A25001835A0 /* ScheduleSettingsViewController.swift */; };
 		F55144452EF51A25001835A0 /* WebDAVSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144422EF51A25001835A0 /* WebDAVSettingsViewController.swift */; };
@@ -41,6 +39,12 @@
 		F551444E2EF531C1001835A0 /* ClockOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551444D2EF531C1001835A0 /* ClockOverlayView.swift */; };
 		F55144502EF536A2001835A0 /* AnalogClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551444F2EF536A2001835A0 /* AnalogClockView.swift */; };
 		F55144532EF53AAA001835A0 /* NSLayoutConstraint+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144512EF53AAA001835A0 /* NSLayoutConstraint+Extensions.swift */; };
+		F5D85F712EF6494D00983F1B /* LoadingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F702EF6494D00983F1B /* LoadingCardView.swift */; };
+		F5D85F732EF702FC00983F1B /* SlideshowControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F722EF702FC00983F1B /* SlideshowControlsView.swift */; };
+		F5D85F772EF7032F00983F1B /* KenBurnsAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F752EF7032F00983F1B /* KenBurnsAnimator.swift */; };
+		F5D85F782EF7032F00983F1B /* ImageDisplayManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F742EF7032F00983F1B /* ImageDisplayManager.swift */; };
+		F5D85F792EF7032F00983F1B /* VideoPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F762EF7032F00983F1B /* VideoPlayerManager.swift */; };
+		F5D85F7B2EF7035F00983F1B /* SlideShowViewController+Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F7A2EF7035F00983F1B /* SlideShowViewController+Settings.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -75,7 +79,6 @@
 		F55144122EF4F895001835A0 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		F55144142EF4F8AB001835A0 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
 		F55144162EF4F8B9001835A0 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
-		F551441C2EF5027A001835A0 /* BackgroundMusicSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundMusicSettingsViewController.swift; sourceTree = "<group>"; };
 		F551441D2EF5027A001835A0 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		F551441E2EF5027A001835A0 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		F551441F2EF5027A001835A0 /* SlideShowViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideShowViewController.swift; sourceTree = "<group>"; };
@@ -89,7 +92,6 @@
 		F55144292EF5027A001835A0 /* WebDAVClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVClient.swift; sourceTree = "<group>"; };
 		F551442B2EF5027A001835A0 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		F551442D2EF5027A001835A0 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
-		F551443D2EF5045F001835A0 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		F551443F2EF51A25001835A0 /* CacheSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheSettingsViewController.swift; sourceTree = "<group>"; };
 		F55144402EF51A25001835A0 /* PlaybackSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackSettingsViewController.swift; sourceTree = "<group>"; };
 		F55144412EF51A25001835A0 /* ScheduleSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleSettingsViewController.swift; sourceTree = "<group>"; };
@@ -100,6 +102,12 @@
 		F551444D2EF531C1001835A0 /* ClockOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClockOverlayView.swift; sourceTree = "<group>"; };
 		F551444F2EF536A2001835A0 /* AnalogClockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalogClockView.swift; sourceTree = "<group>"; };
 		F55144512EF53AAA001835A0 /* NSLayoutConstraint+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSLayoutConstraint+Extensions.swift"; sourceTree = "<group>"; };
+		F5D85F702EF6494D00983F1B /* LoadingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingCardView.swift; sourceTree = "<group>"; };
+		F5D85F722EF702FC00983F1B /* SlideshowControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideshowControlsView.swift; sourceTree = "<group>"; };
+		F5D85F742EF7032F00983F1B /* ImageDisplayManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDisplayManager.swift; sourceTree = "<group>"; };
+		F5D85F752EF7032F00983F1B /* KenBurnsAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KenBurnsAnimator.swift; sourceTree = "<group>"; };
+		F5D85F762EF7032F00983F1B /* VideoPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerManager.swift; sourceTree = "<group>"; };
+		F5D85F7A2EF7035F00983F1B /* SlideShowViewController+Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SlideShowViewController+Settings.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -156,7 +164,6 @@
 			children = (
 				F551442E2EF5027A001835A0 /* Sources */,
 				514DEAF92EF4E78E00546217 /* AppDelegate.swift */,
-				F551443D2EF5045F001835A0 /* SceneDelegate.swift */,
 				514DEB022EF4E79000546217 /* Assets.xcassets */,
 				514DEB042EF4E79000546217 /* LaunchScreen.storyboard */,
 				514DEB072EF4E79000546217 /* Info.plist */,
@@ -194,10 +201,10 @@
 		F55144212EF5027A001835A0 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				F551441C2EF5027A001835A0 /* BackgroundMusicSettingsViewController.swift */,
 				F551441D2EF5027A001835A0 /* MainViewController.swift */,
 				F551441E2EF5027A001835A0 /* SettingsViewController.swift */,
 				F551441F2EF5027A001835A0 /* SlideShowViewController.swift */,
+				F5D85F7A2EF7035F00983F1B /* SlideShowViewController+Settings.swift */,
 				F55144202EF5027A001835A0 /* WebDAVBrowserViewController.swift */,
 				F551443F2EF51A25001835A0 /* CacheSettingsViewController.swift */,
 				F551444B2EF531B1001835A0 /* ClockSettingsViewController.swift */,
@@ -223,6 +230,9 @@
 			children = (
 				F55144242EF5027A001835A0 /* ImageCacheService.swift */,
 				F55144252EF5027A001835A0 /* LocationService.swift */,
+				F5D85F742EF7032F00983F1B /* ImageDisplayManager.swift */,
+				F5D85F752EF7032F00983F1B /* KenBurnsAnimator.swift */,
+				F5D85F762EF7032F00983F1B /* VideoPlayerManager.swift */,
 				F55144262EF5027A001835A0 /* MusicService.swift */,
 				F55144272EF5027A001835A0 /* PhotoService.swift */,
 				F55144282EF5027A001835A0 /* SchedulerService.swift */,
@@ -236,6 +246,8 @@
 			children = (
 				F551444F2EF536A2001835A0 /* AnalogClockView.swift */,
 				F551444D2EF531C1001835A0 /* ClockOverlayView.swift */,
+				F5D85F722EF702FC00983F1B /* SlideshowControlsView.swift */,
+				F5D85F702EF6494D00983F1B /* LoadingCardView.swift */,
 				F551442B2EF5027A001835A0 /* DashboardView.swift */,
 			);
 			path = Views;
@@ -399,18 +411,22 @@
 				F55144312EF5027A001835A0 /* MusicService.swift in Sources */,
 				F55144432EF51A25001835A0 /* CacheSettingsViewController.swift in Sources */,
 				F55144442EF51A25001835A0 /* ScheduleSettingsViewController.swift in Sources */,
+				F5D85F712EF6494D00983F1B /* LoadingCardView.swift in Sources */,
 				F55144482EF51DB9001835A0 /* MusicSettingsViewController.swift in Sources */,
 				F55144452EF51A25001835A0 /* WebDAVSettingsViewController.swift in Sources */,
 				F55144462EF51A25001835A0 /* PlaybackSettingsViewController.swift in Sources */,
 				F55144322EF5027A001835A0 /* PhotoService.swift in Sources */,
 				F55144332EF5027A001835A0 /* SlideShowViewController.swift in Sources */,
 				F551444C2EF531B1001835A0 /* ClockSettingsViewController.swift in Sources */,
-				F55144342EF5027A001835A0 /* BackgroundMusicSettingsViewController.swift in Sources */,
 				F55144502EF536A2001835A0 /* AnalogClockView.swift in Sources */,
+				F5D85F7B2EF7035F00983F1B /* SlideShowViewController+Settings.swift in Sources */,
+				F5D85F772EF7032F00983F1B /* KenBurnsAnimator.swift in Sources */,
+				F5D85F782EF7032F00983F1B /* ImageDisplayManager.swift in Sources */,
+				F5D85F792EF7032F00983F1B /* VideoPlayerManager.swift in Sources */,
 				F55144352EF5027A001835A0 /* MediaItem.swift in Sources */,
-				F551443E2EF5045F001835A0 /* SceneDelegate.swift in Sources */,
 				F55144362EF5027A001835A0 /* SchedulerService.swift in Sources */,
 				F55144372EF5027A001835A0 /* WebDAVBrowserViewController.swift in Sources */,
+				F5D85F732EF702FC00983F1B /* SlideshowControlsView.swift in Sources */,
 				F55144382EF5027A001835A0 /* MainViewController.swift in Sources */,
 				F55144392EF5027A001835A0 /* LocationService.swift in Sources */,
 				F551443A2EF5027A001835A0 /* WebDAVClient.swift in Sources */,

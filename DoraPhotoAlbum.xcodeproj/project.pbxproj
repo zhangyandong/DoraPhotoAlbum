@@ -355,7 +355,7 @@
 			};
 			buildConfigurationList = 514DEAF12EF4E78E00546217 /* Build configuration list for PBXProject "DoraPhotoAlbum" */;
 			compatibilityVersion = "Xcode 14.0";
-			developmentRegion = en;
+			developmentRegion = "zh-Hans";
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
@@ -610,6 +610,9 @@
 				DEVELOPMENT_TEAM = 25SXM6G9T3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DoraPhotoAlbum/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "哆啦相册";
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "需要访问您的媒体库以播放背景音乐。";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "需要访问您的相册以在电子相册中展示照片。";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -643,6 +646,9 @@
 				DEVELOPMENT_TEAM = 25SXM6G9T3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DoraPhotoAlbum/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "哆啦相册";
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "需要访问您的媒体库以播放背景音乐。";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "需要访问您的相册以在电子相册中展示照片。";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

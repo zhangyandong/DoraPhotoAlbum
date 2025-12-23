@@ -7,9 +7,5 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>需要访问您的媒体库以播放背景音乐。</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>需要访问您的相册以在电子相册中展示照片。</string>
 </dict>
 </plist>

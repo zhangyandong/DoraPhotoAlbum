@@ -260,13 +260,13 @@ class MusicSettingsViewController: UIViewController, UITableViewDelegate, UITabl
             if authorizationStatus != .authorized {
                 // Show permission prompt
                 cell.textLabel?.text = "需要音乐权限 - 点击前往设置"
-                cell.textLabel?.textColor = .systemBlue
+                cell.textLabel?.textColor = .appAccentBlue
                 cell.accessoryType = .disclosureIndicator
                 cell.selectionStyle = .default
             } else if indexPath.row == 0 {
                 cell.textLabel?.text = "所有歌曲 (All Songs)"
                 if #available(iOS 13.0, *) {
-                    cell.textLabel?.textColor = .label
+                    cell.textLabel?.textColor = .appLabel
                 } else {
                     cell.textLabel?.textColor = .black
                 }
@@ -278,7 +278,7 @@ class MusicSettingsViewController: UIViewController, UITableViewDelegate, UITabl
                 let name = playlist.value(forProperty: MPMediaPlaylistPropertyName) as? String ?? "Unknown"
                 cell.textLabel?.text = name
                 if #available(iOS 13.0, *) {
-                    cell.textLabel?.textColor = .label
+                    cell.textLabel?.textColor = .appLabel
                 } else {
                     cell.textLabel?.textColor = .black
                 }
@@ -302,7 +302,7 @@ class MusicSettingsViewController: UIViewController, UITableViewDelegate, UITabl
         cell.imageView?.image = nil
         cell.selectionStyle = .default
         if #available(iOS 13.0, *) {
-            cell.textLabel?.textColor = .label
+            cell.textLabel?.textColor = .appLabel
         } else {
             cell.textLabel?.textColor = .black
         }

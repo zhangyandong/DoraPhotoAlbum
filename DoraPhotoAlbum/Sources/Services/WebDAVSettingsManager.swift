@@ -55,7 +55,15 @@ final class WebDAVSettingsManager {
         
         // If another device changed WebDAV settings, reload media source.
         if notify && didAffectWebDAV {
-            NotificationCenter.default.post(name: .mediaSourceChanged, object: nil)
+            // KVS change notifications can arrive on a background thread.
+            // UI listeners (controllers) must only react on the main thread.
+            if Thread.isMainThread {
+                NotificationCenter.default.post(name: .mediaSourceChanged, object: nil)
+            } else {
+                DispatchQueue.main.async {
+                    NotificationCenter.default.post(name: .mediaSourceChanged, object: nil)
+                }
+            }
         }
     }
 

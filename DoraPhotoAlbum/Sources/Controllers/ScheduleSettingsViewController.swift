@@ -268,19 +268,19 @@ class WeekdaySelectorView: UIView {
             let isSelected = selectedWeekdays.contains(weekday)
             
             if isSelected {
-                button.backgroundColor = .systemBlue
+                button.backgroundColor = .appAccentBlue
                 button.setTitleColor(.white, for: .normal)
-                button.layer.borderColor = UIColor.systemBlue.cgColor
+                button.layer.borderColor = UIColor.appAccentBlue.cgColor
             } else {
                 // Use lighter background color for unselected buttons
                 if #available(iOS 13.0, *) {
-                    button.backgroundColor = UIColor.systemBackground
+                    button.backgroundColor = UIColor.appSystemBackground
                 } else {
                     button.backgroundColor = .white
                 }
                 // Use compatible text color for all iOS versions
                 if #available(iOS 13.0, *) {
-                    button.setTitleColor(.label, for: .normal)
+                    button.setTitleColor(.appLabel, for: .normal)
                 } else {
                     button.setTitleColor(.darkText, for: .normal)
                 }

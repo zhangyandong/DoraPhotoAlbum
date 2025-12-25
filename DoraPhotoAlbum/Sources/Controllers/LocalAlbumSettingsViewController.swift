@@ -58,7 +58,7 @@ class LocalAlbumSettingsViewController: UIViewController {
         statusLabel.numberOfLines = 0
         stack.addArrangedSubview(statusLabel)
         
-        let settingsBtn = makeButton(title: "去设置开启权限", color: .systemBlue, action: #selector(openSystemSettings))
+        let settingsBtn = makeButton(title: "去设置开启权限", color: .appAccentBlue, action: #selector(openSystemSettings))
         stack.addArrangedSubview(settingsBtn)
         
         enableSwitch.addTarget(self, action: #selector(switchChanged), for: .valueChanged)

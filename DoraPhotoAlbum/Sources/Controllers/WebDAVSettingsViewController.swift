@@ -74,20 +74,20 @@ class WebDAVSettingsViewController: UIViewController, UITextFieldDelegate {
         configureField(passField, placeholder: "password", isSecure: true)
         stack.addArrangedSubview(passField)
         
-        let testBtn = makeButton(title: "测试连接", color: .systemBlue, action: #selector(testConnection))
+        let testBtn = makeButton(title: "测试连接", color: .appAccentBlue, action: #selector(testConnection))
         stack.addArrangedSubview(testBtn)
         
         let iCloudColor: UIColor = {
             if #available(iOS 13.0, *) {
                 return .systemIndigo
             } else {
-                return .systemBlue
+                return .appAccentBlue
             }
         }()
         let iCloudBtn = makeButton(title: "手动同步 iCloud 配置", color: iCloudColor, action: #selector(manualSyncICloud))
         stack.addArrangedSubview(iCloudBtn)
         
-        let manageBtn = makeButton(title: "管理文件夹", color: .systemGreen, action: #selector(openPathsManager))
+        let manageBtn = makeButton(title: "管理文件夹", color: .appAccentGreen, action: #selector(openPathsManager))
         stack.addArrangedSubview(manageBtn)
         
         let labelTitle = createLabel("已选择文件夹（可多个）")

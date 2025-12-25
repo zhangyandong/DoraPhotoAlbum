@@ -40,6 +40,7 @@
 		F55144502EF536A2001835A0 /* AnalogClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551444F2EF536A2001835A0 /* AnalogClockView.swift */; };
 		F55144532EF53AAA001835A0 /* NSLayoutConstraint+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144512EF53AAA001835A0 /* NSLayoutConstraint+Extensions.swift */; };
 		F594C8052EFD879400362BBA /* WebDAVPathsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F594C8042EFD879400362BBA /* WebDAVPathsViewController.swift */; };
+		F594C8072EFD985100362BBA /* UIColor+Compat.swift in Sources */ = {isa = PBXBuildFile; fileRef = F594C8062EFD985100362BBA /* UIColor+Compat.swift */; };
 		F5D85F712EF6494D00983F1B /* LoadingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F702EF6494D00983F1B /* LoadingCardView.swift */; };
 		F5D85F732EF702FC00983F1B /* SlideshowControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F722EF702FC00983F1B /* SlideshowControlsView.swift */; };
 		F5D85F772EF7032F00983F1B /* KenBurnsAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F752EF7032F00983F1B /* KenBurnsAnimator.swift */; };
@@ -105,6 +106,7 @@
 		F551444F2EF536A2001835A0 /* AnalogClockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalogClockView.swift; sourceTree = "<group>"; };
 		F55144512EF53AAA001835A0 /* NSLayoutConstraint+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSLayoutConstraint+Extensions.swift"; sourceTree = "<group>"; };
 		F594C8042EFD879400362BBA /* WebDAVPathsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVPathsViewController.swift; sourceTree = "<group>"; };
+		F594C8062EFD985100362BBA /* UIColor+Compat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Compat.swift"; sourceTree = "<group>"; };
 		F5D85F702EF6494D00983F1B /* LoadingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingCardView.swift; sourceTree = "<group>"; };
 		F5D85F722EF702FC00983F1B /* SlideshowControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideshowControlsView.swift; sourceTree = "<group>"; };
 		F5D85F742EF7032F00983F1B /* ImageDisplayManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDisplayManager.swift; sourceTree = "<group>"; };
@@ -277,6 +279,7 @@
 		F55144522EF53AAA001835A0 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				F594C8062EFD985100362BBA /* UIColor+Compat.swift */,
 				F55144512EF53AAA001835A0 /* NSLayoutConstraint+Extensions.swift */,
 			);
 			path = Extensions;
@@ -434,6 +437,7 @@
 				F594C8052EFD879400362BBA /* WebDAVPathsViewController.swift in Sources */,
 				F5D85F792EF7032F00983F1B /* VideoPlayerManager.swift in Sources */,
 				F55144352EF5027A001835A0 /* MediaItem.swift in Sources */,
+				F594C8072EFD985100362BBA /* UIColor+Compat.swift in Sources */,
 				F55144362EF5027A001835A0 /* SchedulerService.swift in Sources */,
 				F55144372EF5027A001835A0 /* WebDAVBrowserViewController.swift in Sources */,
 				F5D85F732EF702FC00983F1B /* SlideshowControlsView.swift in Sources */,

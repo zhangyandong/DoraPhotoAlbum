@@ -217,7 +217,7 @@ extension WebDAVBrowserViewController: UITableViewDataSource, UITableViewDelegat
         // Set folder icon - compatible with iOS 12.5+
         if #available(iOS 13.0, *) {
             cell.imageView?.image = UIImage(systemName: "folder.fill")
-            cell.imageView?.tintColor = .systemBlue
+            cell.imageView?.tintColor = .appAccentBlue
         } else {
             // Fallback for iOS 12: use a simple folder icon or default style
             cell.imageView?.image = nil

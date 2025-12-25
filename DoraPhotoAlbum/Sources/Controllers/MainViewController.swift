@@ -23,11 +23,7 @@ class MainViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        if #available(iOS 13.0, *) {
-            view.backgroundColor = .systemGroupedBackground
-        } else {
-            view.backgroundColor = .groupTableViewBackground
-        }
+        view.backgroundColor = .appSystemGroupedBackground
         
         setupUI()
         
@@ -63,21 +59,29 @@ class MainViewController: UIViewController {
     }
     
     @objc private func handleMediaSourceChanged() {
-        reloadMedia()
+        // Notifications may be posted from background threads (e.g. iCloud KVS callbacks).
+        // Any UI / layout work must be on main.
+        if Thread.isMainThread {
+            reloadMedia()
+        } else {
+            DispatchQueue.main.async { [weak self] in
+                self?.reloadMedia()
+            }
+        }
     }
     
     private func setupUI() {
         // Header (kid-friendly)
         titleLabel = UILabel()
         titleLabel.text = "Dora 相册"
-        titleLabel.textColor = .black
+        titleLabel.textColor = .appLabel
         titleLabel.font = UIFont.systemFont(ofSize: 34, weight: .bold)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(titleLabel)
         
         hintLabel = UILabel()
         hintLabel.text = "点“开始播放”就能看照片啦"
-        hintLabel.textColor = .darkGray
+        hintLabel.textColor = .appSecondaryLabel
         hintLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         hintLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(hintLabel)
@@ -113,7 +117,7 @@ class MainViewController: UIViewController {
         playButton.setTitle("开始播放", for: .normal)
         playButton.titleLabel?.font = UIFont.systemFont(ofSize: 28, weight: .bold)
         playButton.setTitleColor(.white, for: .normal)
-        playButton.backgroundColor = UIColor.systemGreen
+        playButton.backgroundColor = UIColor.appAccentGreen
         playButton.layer.cornerRadius = 18
         playButton.translatesAutoresizingMaskIntoConstraints = false
         playButton.addTarget(self, action: #selector(startSlideShow), for: .touchUpInside)
@@ -124,7 +128,7 @@ class MainViewController: UIViewController {
         // Settings entry (simple tap)
         let settingsButton = UIButton(type: .system)
         settingsButton.setTitle("设置", for: .normal)
-        settingsButton.setTitleColor(.systemBlue, for: .normal)
+        settingsButton.setTitleColor(.appAccentBlue, for: .normal)
         settingsButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         settingsButton.translatesAutoresizingMaskIntoConstraints = false
         settingsButton.addTarget(self, action: #selector(openSettings), for: .touchUpInside)

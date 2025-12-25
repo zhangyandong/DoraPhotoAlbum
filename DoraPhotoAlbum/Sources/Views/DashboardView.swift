@@ -72,6 +72,15 @@ class DashboardView: UIView {
     }
     
     func updatePhotoMeta(_ item: UnifiedMediaItem) {
+        // This method is sometimes called from async callbacks.
+        // Any label/AutoLayout changes must be performed on the main thread.
+        if !Thread.isMainThread {
+            DispatchQueue.main.async { [weak self] in
+                self?.updatePhotoMeta(item)
+            }
+            return
+        }
+        
         // Cancel any ongoing geocoding task
         currentGeocodingTask?.cancelGeocode()
         currentGeocodingTask = nil

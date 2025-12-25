@@ -82,8 +82,17 @@ class SlideShowViewController: UIViewController {
     }
     
     @objc private func handleMediaSourceChanged() {
-        // Dismiss settings and slideshow to return to main screen for reload
-        self.presentingViewController?.dismiss(animated: true)
+        // Notification may be posted from a background thread (e.g. iCloud KVS callbacks).
+        // Dismissal triggers layout work, so it must happen on main.
+        let work: () -> Void = { [weak self] in
+            // Dismiss settings and slideshow to return to main screen for reload
+            self?.presentingViewController?.dismiss(animated: true)
+        }
+        if Thread.isMainThread {
+            work()
+        } else {
+            DispatchQueue.main.async(execute: work)
+        }
     }
     
     private func setupUI() {

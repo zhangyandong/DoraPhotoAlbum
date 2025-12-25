@@ -188,6 +188,15 @@ class ClockOverlayView: UIView {
     }
     
     @objc private func updateSettings() {
+        // This selector can be invoked via NotificationCenter on the posting thread.
+        // Any UI / AutoLayout changes must happen on the main thread.
+        if !Thread.isMainThread {
+            DispatchQueue.main.async { [weak self] in
+                self?.updateSettings()
+            }
+            return
+        }
+        
         let showDate: Bool
         if UserDefaults.standard.object(forKey: AppConstants.Keys.kClockShowDate) != nil {
             showDate = UserDefaults.standard.bool(forKey: AppConstants.Keys.kClockShowDate)

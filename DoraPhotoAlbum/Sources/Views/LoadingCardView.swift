@@ -19,7 +19,14 @@ class LoadingCardView: UIView {
     
     var state: LoadingState = .loading {
         didSet {
-            updateUI()
+            // `state` may be updated from async callbacks. Ensure UI work happens on main.
+            if Thread.isMainThread {
+                updateUI()
+            } else {
+                DispatchQueue.main.async { [weak self] in
+                    self?.updateUI()
+                }
+            }
         }
     }
     
@@ -34,11 +41,7 @@ class LoadingCardView: UIView {
     }
     
     private func setupUI() {
-        if #available(iOS 13.0, *) {
-            backgroundColor = .secondarySystemGroupedBackground
-        } else {
-            backgroundColor = .white
-        }
+        backgroundColor = .appSecondarySystemGroupedBackground
         layer.cornerRadius = 14
         layer.masksToBounds = false
         layer.shadowColor = UIColor.black.cgColor
@@ -50,17 +53,17 @@ class LoadingCardView: UIView {
         
         // Title
         titleLabel.font = UIFont.systemFont(ofSize: 20, weight: .bold)
-        titleLabel.textColor = .black
+        titleLabel.textColor = .appLabel
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(titleLabel)
         
         // Settings button (entry)
         if #available(iOS 13.0, *) {
             settingsButton.setImage(UIImage(systemName: "gearshape"), for: .normal)
-            settingsButton.tintColor = .systemBlue
+            settingsButton.tintColor = .appAccentBlue
         } else {
             settingsButton.setTitle("设置", for: .normal)
-            settingsButton.setTitleColor(.systemBlue, for: .normal)
+            settingsButton.setTitleColor(.appAccentBlue, for: .normal)
             settingsButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
         }
         settingsButton.translatesAutoresizingMaskIntoConstraints = false
@@ -69,7 +72,7 @@ class LoadingCardView: UIView {
         
         // Status
         statusLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        statusLabel.textColor = .darkGray
+        statusLabel.textColor = .appSecondaryLabel
         statusLabel.numberOfLines = 0
         statusLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(statusLabel)
@@ -77,7 +80,7 @@ class LoadingCardView: UIView {
         // Reload button
         reloadButton.setTitle("刷新", for: .normal)
         reloadButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-        reloadButton.setTitleColor(.systemBlue, for: .normal)
+        reloadButton.setTitleColor(.appAccentBlue, for: .normal)
         reloadButton.translatesAutoresizingMaskIntoConstraints = false
         reloadButton.addTarget(self, action: #selector(reloadTapped), for: .touchUpInside)
         addSubview(reloadButton)
@@ -109,17 +112,17 @@ class LoadingCardView: UIView {
         switch state {
         case .loading:
             statusLabel.text = "加载中..."
-            statusLabel.textColor = .darkGray
+            statusLabel.textColor = .appSecondaryLabel
             reloadButton.isHidden = true
             
         case .completed(let count):
             statusLabel.text = "已加载 \(count) 个项目"
-            statusLabel.textColor = .systemGreen
+            statusLabel.textColor = .appAccentGreen
             reloadButton.isHidden = false
             
         case .error(let message):
             statusLabel.text = message
-            statusLabel.textColor = .systemRed
+            statusLabel.textColor = .appAccentRed
             reloadButton.isHidden = false
             
         case .disabled(let message):

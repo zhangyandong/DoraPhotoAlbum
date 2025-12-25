@@ -24,3 +24,4 @@ globs: ["**/*.swift", "**/*.plist", "**/*.pbxproj"]
    - MUST support both Portrait and Landscape orientations (iPad standard).
    - Use Auto Layout and Safe Area guides for all UI to ensure proper resizing on rotation.
    - Avoid hardcoded frames or fixed screen dimensions; rely on constraints to handle size changes.
+

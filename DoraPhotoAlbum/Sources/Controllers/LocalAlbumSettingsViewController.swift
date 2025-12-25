@@ -153,7 +153,11 @@ class LocalAlbumSettingsViewController: UIViewController {
         defaults.synchronize()
         
         onSave?()
-        navigationController?.popViewController(animated: true)
+        if let nav = navigationController, nav.viewControllers.first === self {
+            dismiss(animated: true)
+        } else {
+            navigationController?.popViewController(animated: true)
+        }
     }
     
     private func showAlert(title: String, message: String) {

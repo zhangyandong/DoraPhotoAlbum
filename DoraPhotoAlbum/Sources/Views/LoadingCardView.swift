@@ -12,8 +12,10 @@ class LoadingCardView: UIView {
     let titleLabel = UILabel()
     private let statusLabel = UILabel()
     private let reloadButton = UIButton(type: .system)
+    private let settingsButton = UIButton(type: .system)
     
     var onReload: (() -> Void)?
+    var onSettings: (() -> Void)?
     
     var state: LoadingState = .loading {
         didSet {
@@ -32,26 +34,49 @@ class LoadingCardView: UIView {
     }
     
     private func setupUI() {
-        backgroundColor = UIColor(white: 0.15, alpha: 1.0)
-        layer.cornerRadius = 12
-        layer.masksToBounds = true
+        if #available(iOS 13.0, *) {
+            backgroundColor = .secondarySystemGroupedBackground
+        } else {
+            backgroundColor = .white
+        }
+        layer.cornerRadius = 14
+        layer.masksToBounds = false
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOpacity = 0.08
+        layer.shadowRadius = 10
+        layer.shadowOffset = CGSize(width: 0, height: 4)
+        layer.borderWidth = 1
+        layer.borderColor = UIColor(white: 0.85, alpha: 1.0).cgColor
         
         // Title
-        titleLabel.font = UIFont.boldSystemFont(ofSize: 16)
-        titleLabel.textColor = .white
+        titleLabel.font = UIFont.systemFont(ofSize: 20, weight: .bold)
+        titleLabel.textColor = .black
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(titleLabel)
         
+        // Settings button (entry)
+        if #available(iOS 13.0, *) {
+            settingsButton.setImage(UIImage(systemName: "gearshape"), for: .normal)
+            settingsButton.tintColor = .systemBlue
+        } else {
+            settingsButton.setTitle("设置", for: .normal)
+            settingsButton.setTitleColor(.systemBlue, for: .normal)
+            settingsButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        }
+        settingsButton.translatesAutoresizingMaskIntoConstraints = false
+        settingsButton.addTarget(self, action: #selector(settingsTapped), for: .touchUpInside)
+        addSubview(settingsButton)
+        
         // Status
-        statusLabel.font = UIFont.systemFont(ofSize: 14)
-        statusLabel.textColor = .lightGray
+        statusLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        statusLabel.textColor = .darkGray
         statusLabel.numberOfLines = 0
         statusLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(statusLabel)
         
         // Reload button
-        reloadButton.setTitle("重新加载", for: .normal)
-        reloadButton.titleLabel?.font = UIFont.systemFont(ofSize: 14)
+        reloadButton.setTitle("刷新", for: .normal)
+        reloadButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         reloadButton.setTitleColor(.systemBlue, for: .normal)
         reloadButton.translatesAutoresizingMaskIntoConstraints = false
         reloadButton.addTarget(self, action: #selector(reloadTapped), for: .touchUpInside)
@@ -60,7 +85,12 @@ class LoadingCardView: UIView {
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 16),
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: settingsButton.leadingAnchor, constant: -8),
+            
+            settingsButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
+            settingsButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            settingsButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 44),
+            settingsButton.heightAnchor.constraint(equalToConstant: 30),
             
             statusLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
             statusLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
@@ -69,7 +99,7 @@ class LoadingCardView: UIView {
             
             reloadButton.centerYAnchor.constraint(equalTo: statusLabel.centerYAnchor),
             reloadButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            reloadButton.widthAnchor.constraint(equalToConstant: 80)
+            reloadButton.widthAnchor.constraint(equalToConstant: 72)
         ])
         
         updateUI()
@@ -79,7 +109,7 @@ class LoadingCardView: UIView {
         switch state {
         case .loading:
             statusLabel.text = "加载中..."
-            statusLabel.textColor = .lightGray
+            statusLabel.textColor = .darkGray
             reloadButton.isHidden = true
             
         case .completed(let count):
@@ -94,13 +124,17 @@ class LoadingCardView: UIView {
             
         case .disabled(let message):
             statusLabel.text = message
-            statusLabel.textColor = .darkGray
+            statusLabel.textColor = .gray
             reloadButton.isHidden = false
         }
     }
     
     @objc private func reloadTapped() {
         onReload?()
+    }
+    
+    @objc private func settingsTapped() {
+        onSettings?()
     }
 }
 

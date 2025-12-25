@@ -19,6 +19,8 @@ class WebDAVSettingsViewController: UIViewController, UITextFieldDelegate {
         return l
     }()
     
+    private var initialPaths: [String] = []
+    
     var onSave: (() -> Void)?
     
     override func viewDidLoad() {
@@ -75,10 +77,20 @@ class WebDAVSettingsViewController: UIViewController, UITextFieldDelegate {
         let testBtn = makeButton(title: "测试连接", color: .systemBlue, action: #selector(testConnection))
         stack.addArrangedSubview(testBtn)
         
-        let selectBtn = makeButton(title: "选择文件夹", color: .systemGreen, action: #selector(selectFolder))
-        stack.addArrangedSubview(selectBtn)
+        let iCloudColor: UIColor = {
+            if #available(iOS 13.0, *) {
+                return .systemIndigo
+            } else {
+                return .systemBlue
+            }
+        }()
+        let iCloudBtn = makeButton(title: "手动同步 iCloud 配置", color: iCloudColor, action: #selector(manualSyncICloud))
+        stack.addArrangedSubview(iCloudBtn)
         
-        let labelTitle = createLabel("已选择文件夹")
+        let manageBtn = makeButton(title: "管理文件夹", color: .systemGreen, action: #selector(openPathsManager))
+        stack.addArrangedSubview(manageBtn)
+        
+        let labelTitle = createLabel("已选择文件夹（可多个）")
         stack.addArrangedSubview(labelTitle)
         stack.addArrangedSubview(selectedFolderLabel)
     }
@@ -127,26 +139,29 @@ class WebDAVSettingsViewController: UIViewController, UITextFieldDelegate {
         button.addTarget(self, action: action, for: .touchUpInside)
         return button
     }
-    
+
     // MARK: - Actions
     @objc private func save() {
-        let defaults = UserDefaults.standard
-        let oldPath = defaults.string(forKey: AppConstants.Keys.kWebDAVSelectedPath)
-        let wasEnabled = defaults.bool(forKey: AppConstants.Keys.kWebDAVEnabled)
+        let settings = WebDAVSettingsManager.shared
+        let oldPaths = initialPaths
+        let wasEnabled = settings.bool(forKey: AppConstants.Keys.kWebDAVEnabled)
         
-        defaults.set(enableSwitch.isOn, forKey: AppConstants.Keys.kWebDAVEnabled)
-        defaults.set(hostField.text, forKey: AppConstants.Keys.kWebDAVHost)
-        defaults.set(userField.text, forKey: AppConstants.Keys.kWebDAVUser)
-        defaults.set(passField.text, forKey: AppConstants.Keys.kWebDAVPassword)
-        defaults.synchronize()
+        settings.set(enableSwitch.isOn, forKey: AppConstants.Keys.kWebDAVEnabled)
+        settings.set(hostField.text, forKey: AppConstants.Keys.kWebDAVHost)
+        settings.set(userField.text, forKey: AppConstants.Keys.kWebDAVUser)
+        settings.set(passField.text, forKey: AppConstants.Keys.kWebDAVPassword)
         
-        let newPath = defaults.string(forKey: AppConstants.Keys.kWebDAVSelectedPath)
-        if oldPath != newPath || wasEnabled != enableSwitch.isOn {
+        let newPaths = settings.stringArray(forKey: AppConstants.Keys.kWebDAVSelectedPaths) ?? []
+        if oldPaths != newPaths || wasEnabled != enableSwitch.isOn {
             print("Settings: WebDAV path or status changed, will reload media")
         }
         
         onSave?()
-        navigationController?.popViewController(animated: true)
+        if let nav = navigationController, nav.viewControllers.first === self {
+            dismiss(animated: true)
+        } else {
+            navigationController?.popViewController(animated: true)
+        }
     }
     
     @objc private func testConnection() {
@@ -176,33 +191,97 @@ class WebDAVSettingsViewController: UIViewController, UITextFieldDelegate {
         }
     }
     
-    @objc private func selectFolder() {
-        guard let host = hostField.text, !host.isEmpty,
-              let _ = userField.text,
-              let _ = passField.text else {
-            showAlert(title: "提示", message: "请先填写并保存WebDAV配置信息")
-            return
+    @objc private func openPathsManager() {
+        // Persist fields first so paths manager can use saved credentials.
+        persistUIToSettings()
+        
+        let vc = WebDAVPathsViewController()
+        vc.onSave = { [weak self] in
+            self?.loadData()
+            self?.onSave?()
+        }
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    @objc private func manualSyncICloud(_ sender: UIButton) {
+        let sheet = UIAlertController(title: "iCloud 配置同步", message: "选择同步方式。注意：拉取/上传都会覆盖一端的配置。", preferredStyle: .actionSheet)
+        
+        sheet.addAction(UIAlertAction(title: "从 iCloud 拉取（覆盖本机）", style: .default) { [weak self] _ in
+            self?.confirmPullFromiCloud()
+        })
+        
+        sheet.addAction(UIAlertAction(title: "上传到 iCloud（覆盖云端）", style: .default) { [weak self] _ in
+            self?.confirmPushToiCloud()
+        })
+        
+        sheet.addAction(UIAlertAction(title: "取消", style: .cancel))
+        
+        // iPad compatibility
+        if let popover = sheet.popoverPresentationController {
+            popover.sourceView = sender
+            popover.sourceRect = sender.bounds
         }
         
-        let defaults = UserDefaults.standard
-        defaults.set(hostField.text, forKey: AppConstants.Keys.kWebDAVHost)
-        defaults.set(userField.text, forKey: AppConstants.Keys.kWebDAVUser)
-        defaults.set(passField.text, forKey: AppConstants.Keys.kWebDAVPassword)
+        present(sheet, animated: true)
+    }
+    
+    private func confirmPullFromiCloud() {
+        let alert = UIAlertController(title: "确认拉取", message: "将从 iCloud 拉取 WebDAV 配置并覆盖本机设置。\n\n未保存的修改将丢失。", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "取消", style: .cancel))
+        alert.addAction(UIAlertAction(title: "拉取", style: .destructive) { [weak self] _ in
+            self?.performPullFromiCloud()
+        })
+        present(alert, animated: true)
+    }
+    
+    private func confirmPushToiCloud() {
+        let alert = UIAlertController(title: "确认上传", message: "将把当前页面内容保存并上传到 iCloud，可能覆盖其它设备上的 WebDAV 配置。", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "取消", style: .cancel))
+        alert.addAction(UIAlertAction(title: "上传", style: .destructive) { [weak self] _ in
+            self?.performPushToiCloud()
+        })
+        present(alert, animated: true)
+    }
+    
+    private func persistUIToSettings() {
+        let settings = WebDAVSettingsManager.shared
+        settings.set(enableSwitch.isOn, forKey: AppConstants.Keys.kWebDAVEnabled)
+        settings.set(hostField.text, forKey: AppConstants.Keys.kWebDAVHost)
+        settings.set(userField.text, forKey: AppConstants.Keys.kWebDAVUser)
+        settings.set(passField.text, forKey: AppConstants.Keys.kWebDAVPassword)
+    }
+    
+    private func performPullFromiCloud() {
+        let progress = UIAlertController(title: "同步中", message: "正在从 iCloud 拉取配置...", preferredStyle: .alert)
+        present(progress, animated: true)
         
-        let browserVC = WebDAVBrowserViewController()
-        browserVC.onFolderSelected = { [weak self] selectedPath in
-            let defaults = UserDefaults.standard
-            defaults.set(selectedPath, forKey: AppConstants.Keys.kWebDAVSelectedPath)
-            defaults.synchronize()
-            
-            self?.selectedFolderLabel.text = "已选择: \(selectedPath)"
-            self?.showAlert(title: "成功", message: "已选择文件夹: \(selectedPath)\n\n返回主页将自动加载该文件夹中的照片和视频。") {
-                self?.onSave?()
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            WebDAVSettingsManager.shared.syncFromiCloud(notify: false)
+            DispatchQueue.main.async {
+                progress.dismiss(animated: true) { [weak self] in
+                    self?.loadData()
+                    self?.onSave?()
+                    self?.showAlert(title: "完成", message: "已从 iCloud 拉取并更新本机配置。")
+                }
             }
         }
+    }
+    
+    private func performPushToiCloud() {
+        persistUIToSettings()
         
-        let nav = UINavigationController(rootViewController: browserVC)
-        present(nav, animated: true)
+        let progress = UIAlertController(title: "同步中", message: "正在上传到 iCloud...", preferredStyle: .alert)
+        present(progress, animated: true)
+        
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            WebDAVSettingsManager.shared.syncToiCloud()
+            DispatchQueue.main.async {
+                progress.dismiss(animated: true) { [weak self] in
+                    self?.onSave?()
+                    self?.showAlert(title: "完成", message: "已上传当前 WebDAV 配置到 iCloud。")
+                }
+            }
+        }
     }
     
     // MARK: - Helpers
@@ -215,14 +294,30 @@ class WebDAVSettingsViewController: UIViewController, UITextFieldDelegate {
     }
     
     private func loadData() {
-        let defaults = UserDefaults.standard
-        enableSwitch.isOn = defaults.bool(forKey: AppConstants.Keys.kWebDAVEnabled)
-        hostField.text = defaults.string(forKey: AppConstants.Keys.kWebDAVHost)
-        userField.text = defaults.string(forKey: AppConstants.Keys.kWebDAVUser)
-        passField.text = defaults.string(forKey: AppConstants.Keys.kWebDAVPassword)
+        let settings = WebDAVSettingsManager.shared
+        enableSwitch.isOn = settings.bool(forKey: AppConstants.Keys.kWebDAVEnabled)
+        hostField.text = settings.string(forKey: AppConstants.Keys.kWebDAVHost)
+        userField.text = settings.string(forKey: AppConstants.Keys.kWebDAVUser)
+        passField.text = settings.string(forKey: AppConstants.Keys.kWebDAVPassword)
         
-        if let selectedPath = defaults.string(forKey: AppConstants.Keys.kWebDAVSelectedPath), !selectedPath.isEmpty {
-            selectedFolderLabel.text = "已选择: \(selectedPath)"
+        let paths = settings.stringArray(forKey: AppConstants.Keys.kWebDAVSelectedPaths) ?? []
+        initialPaths = paths
+        updateSelectedFoldersSummary(paths)
+    }
+
+    private func updateSelectedFoldersSummary(_ paths: [String]) {
+        if paths.isEmpty {
+            selectedFolderLabel.text = "未选择文件夹"
+            selectedFolderLabel.textColor = .gray
+            return
+        }
+        selectedFolderLabel.textColor = .darkGray
+        if paths.count <= 3 {
+            let display = paths.map { "• \($0)" }.joined(separator: "\n")
+            selectedFolderLabel.text = "已选择 \(paths.count) 个：\n\(display)"
+        } else {
+            let first = paths.prefix(3).map { "• \($0)" }.joined(separator: "\n")
+            selectedFolderLabel.text = "已选择 \(paths.count) 个（仅显示前 3 个）：\n\(first)\n…"
         }
     }
 }

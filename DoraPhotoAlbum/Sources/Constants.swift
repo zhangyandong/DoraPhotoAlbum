@@ -11,6 +11,7 @@ struct AppConstants {
         static let kWebDAVUser = "kWebDAVUser"
         static let kWebDAVPassword = "kWebDAVPassword"
         static let kWebDAVSelectedPath = "kWebDAVSelectedPath"
+        static let kWebDAVSelectedPaths = "kWebDAVSelectedPaths" // [String]
         static let kSleepEnabled = "kSleepEnabled"
         static let kWakeEnabled = "kWakeEnabled"
         static let kSleepTime = "kSleepTime"

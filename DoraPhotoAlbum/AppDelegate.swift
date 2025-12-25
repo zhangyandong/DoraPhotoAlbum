@@ -14,6 +14,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // Restore iCloud-synced WebDAV settings (supports reinstall/other devices)
+        WebDAVSettingsManager.shared.syncFromiCloud(notify: false)
+        
         // Prevent screen from dimming/locking (photo frame style)
         UIApplication.shared.isIdleTimerDisabled = true
         

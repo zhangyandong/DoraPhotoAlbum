@@ -78,6 +78,9 @@ class ImageCacheService {
         }
         try fileManager.moveItem(at: tempURL, to: destinationURL)
         
+        // Touch file for LRU (treat as recently used)
+        try? fileManager.setAttributes([.modificationDate: Date()], ofItemAtPath: destinationURL.path)
+        
         // Check and clean cache asynchronously
         queue.async {
             self.cleanCacheIfNeeded()
@@ -100,6 +103,9 @@ class ImageCacheService {
             return nil
         }
         
+        // Touch file to keep LRU (update modification date on read)
+        try? fileManager.setAttributes([.modificationDate: Date()], ofItemAtPath: filePath.path)
+        
         // Store in memory cache for faster access
         // NSCache will automatically evict objects when limits are reached
         memoryCache.setObject(image, forKey: key as NSString)
@@ -119,10 +125,8 @@ class ImageCacheService {
             if let imageData = image.jpegData(compressionQuality: 0.8) {
                 do {
                     try imageData.write(to: filePath)
-                    // Periodically check and clean cache
-                    if Int.random(in: 0..<10) == 0 { // Check 10% of the time
-                        self.cleanCacheIfNeeded()
-                    }
+                    // Always enforce cache limit (rolling delete when exceeded)
+                    self.cleanCacheIfNeeded()
                 } catch {
                     print("ImageCacheService: Failed to cache image for \(url.absoluteString): \(error)")
                 }
@@ -232,6 +236,13 @@ class ImageCacheService {
         queue.async {
             try? self.fileManager.removeItem(at: self.cacheDirectory)
             try? self.fileManager.createDirectory(at: self.cacheDirectory, withIntermediateDirectories: true, attributes: nil)
+        }
+    }
+
+    /// Force an async eviction pass based on current `maxCacheSize`.
+    func enforceCacheLimitAsync() {
+        queue.async {
+            self.cleanCacheIfNeeded()
         }
     }
     

@@ -39,12 +39,14 @@
 		F551444E2EF531C1001835A0 /* ClockOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551444D2EF531C1001835A0 /* ClockOverlayView.swift */; };
 		F55144502EF536A2001835A0 /* AnalogClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F551444F2EF536A2001835A0 /* AnalogClockView.swift */; };
 		F55144532EF53AAA001835A0 /* NSLayoutConstraint+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55144512EF53AAA001835A0 /* NSLayoutConstraint+Extensions.swift */; };
+		F594C8052EFD879400362BBA /* WebDAVPathsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F594C8042EFD879400362BBA /* WebDAVPathsViewController.swift */; };
 		F5D85F712EF6494D00983F1B /* LoadingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F702EF6494D00983F1B /* LoadingCardView.swift */; };
 		F5D85F732EF702FC00983F1B /* SlideshowControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F722EF702FC00983F1B /* SlideshowControlsView.swift */; };
 		F5D85F772EF7032F00983F1B /* KenBurnsAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F752EF7032F00983F1B /* KenBurnsAnimator.swift */; };
 		F5D85F782EF7032F00983F1B /* ImageDisplayManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F742EF7032F00983F1B /* ImageDisplayManager.swift */; };
 		F5D85F792EF7032F00983F1B /* VideoPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F762EF7032F00983F1B /* VideoPlayerManager.swift */; };
 		F5D85F7B2EF7035F00983F1B /* SlideShowViewController+Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F7A2EF7035F00983F1B /* SlideShowViewController+Settings.swift */; };
+		F5E1A0112F0A000100000001 /* WebDAVSettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E1A0102F0A000100000001 /* WebDAVSettingsManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -102,12 +104,15 @@
 		F551444D2EF531C1001835A0 /* ClockOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClockOverlayView.swift; sourceTree = "<group>"; };
 		F551444F2EF536A2001835A0 /* AnalogClockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalogClockView.swift; sourceTree = "<group>"; };
 		F55144512EF53AAA001835A0 /* NSLayoutConstraint+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSLayoutConstraint+Extensions.swift"; sourceTree = "<group>"; };
+		F594C8042EFD879400362BBA /* WebDAVPathsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVPathsViewController.swift; sourceTree = "<group>"; };
 		F5D85F702EF6494D00983F1B /* LoadingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingCardView.swift; sourceTree = "<group>"; };
 		F5D85F722EF702FC00983F1B /* SlideshowControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideshowControlsView.swift; sourceTree = "<group>"; };
 		F5D85F742EF7032F00983F1B /* ImageDisplayManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDisplayManager.swift; sourceTree = "<group>"; };
 		F5D85F752EF7032F00983F1B /* KenBurnsAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KenBurnsAnimator.swift; sourceTree = "<group>"; };
 		F5D85F762EF7032F00983F1B /* VideoPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerManager.swift; sourceTree = "<group>"; };
 		F5D85F7A2EF7035F00983F1B /* SlideShowViewController+Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SlideShowViewController+Settings.swift"; sourceTree = "<group>"; };
+		F5E1A0102F0A000100000001 /* WebDAVSettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVSettingsManager.swift; sourceTree = "<group>"; };
+		F5E1A0122F0A000100000001 /* DoraPhotoAlbum.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DoraPhotoAlbum.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -166,6 +171,7 @@
 				514DEAF92EF4E78E00546217 /* AppDelegate.swift */,
 				514DEB022EF4E79000546217 /* Assets.xcassets */,
 				514DEB042EF4E79000546217 /* LaunchScreen.storyboard */,
+				F5E1A0122F0A000100000001 /* DoraPhotoAlbum.entitlements */,
 				514DEB072EF4E79000546217 /* Info.plist */,
 			);
 			path = DoraPhotoAlbum;
@@ -210,6 +216,7 @@
 				F551444B2EF531B1001835A0 /* ClockSettingsViewController.swift */,
 				F55144472EF51DB9001835A0 /* MusicSettingsViewController.swift */,
 				F55144492EF5200B001835A0 /* LocalAlbumSettingsViewController.swift */,
+				F594C8042EFD879400362BBA /* WebDAVPathsViewController.swift */,
 				F55144402EF51A25001835A0 /* PlaybackSettingsViewController.swift */,
 				F55144412EF51A25001835A0 /* ScheduleSettingsViewController.swift */,
 				F55144422EF51A25001835A0 /* WebDAVSettingsViewController.swift */,
@@ -237,6 +244,7 @@
 				F55144272EF5027A001835A0 /* PhotoService.swift */,
 				F55144282EF5027A001835A0 /* SchedulerService.swift */,
 				F55144292EF5027A001835A0 /* WebDAVClient.swift */,
+				F5E1A0102F0A000100000001 /* WebDAVSettingsManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -416,12 +424,14 @@
 				F55144452EF51A25001835A0 /* WebDAVSettingsViewController.swift in Sources */,
 				F55144462EF51A25001835A0 /* PlaybackSettingsViewController.swift in Sources */,
 				F55144322EF5027A001835A0 /* PhotoService.swift in Sources */,
+				F5E1A0112F0A000100000001 /* WebDAVSettingsManager.swift in Sources */,
 				F55144332EF5027A001835A0 /* SlideShowViewController.swift in Sources */,
 				F551444C2EF531B1001835A0 /* ClockSettingsViewController.swift in Sources */,
 				F55144502EF536A2001835A0 /* AnalogClockView.swift in Sources */,
 				F5D85F7B2EF7035F00983F1B /* SlideShowViewController+Settings.swift in Sources */,
 				F5D85F772EF7032F00983F1B /* KenBurnsAnimator.swift in Sources */,
 				F5D85F782EF7032F00983F1B /* ImageDisplayManager.swift in Sources */,
+				F594C8052EFD879400362BBA /* WebDAVPathsViewController.swift in Sources */,
 				F5D85F792EF7032F00983F1B /* VideoPlayerManager.swift in Sources */,
 				F55144352EF5027A001835A0 /* MediaItem.swift in Sources */,
 				F55144362EF5027A001835A0 /* SchedulerService.swift in Sources */,
@@ -604,6 +614,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = DoraPhotoAlbum/DoraPhotoAlbum.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -640,6 +651,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = DoraPhotoAlbum/DoraPhotoAlbum.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;

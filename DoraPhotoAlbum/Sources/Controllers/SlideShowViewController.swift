@@ -379,7 +379,17 @@ class SlideShowViewController: UIViewController {
         // Only control clock overlay with vertical swipe, not dashboard
         // guard isClockMode else { return }
         
-        let targetAlpha: CGFloat = (gesture.direction == .down) ? 0 : 1
+        let shouldShow = (gesture.direction == .up)
+        
+        // If user reveals the clock via swipe (without tapping the clock button),
+        // we still need to start the timer so it ticks every second.
+        if shouldShow {
+            clockOverlayView?.startUpdating()
+        } else {
+            clockOverlayView?.stopUpdating()
+        }
+        
+        let targetAlpha: CGFloat = shouldShow ? 1 : 0
         UIView.animate(withDuration: Constants.fadeDuration) {
             self.clockOverlayView?.alpha = targetAlpha
         }

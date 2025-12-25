@@ -10,6 +10,8 @@ class MainViewController: UIViewController {
     private var webDAVCard: LoadingCardView!
     private var cardsStack: UIStackView!
     private var playButton: UIButton!
+    private var titleLabel: UILabel!
+    private var hintLabel: UILabel!
     
     // Loading state tracking
     private var localLoadingState: LoadingCardView.LoadingState = .loading
@@ -17,10 +19,15 @@ class MainViewController: UIViewController {
     private var localItemsCount: Int = 0
     private var webDAVItemsCount: Int = 0
     private var hasAutoPlayed: Bool = false
+    private var presentedSettingsNav: UINavigationController?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .black
+        if #available(iOS 13.0, *) {
+            view.backgroundColor = .systemGroupedBackground
+        } else {
+            view.backgroundColor = .groupTableViewBackground
+        }
         
         setupUI()
         
@@ -60,10 +67,20 @@ class MainViewController: UIViewController {
     }
     
     private func setupUI() {
-        let settingsBtn = UIButton(type: .infoLight)
-        settingsBtn.tintColor = .white
-        settingsBtn.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(settingsBtn)
+        // Header (kid-friendly)
+        titleLabel = UILabel()
+        titleLabel.text = "Dora 相册"
+        titleLabel.textColor = .black
+        titleLabel.font = UIFont.systemFont(ofSize: 34, weight: .bold)
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(titleLabel)
+        
+        hintLabel = UILabel()
+        hintLabel.text = "点“开始播放”就能看照片啦"
+        hintLabel.textColor = .darkGray
+        hintLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        hintLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(hintLabel)
         
         // Create loading cards
         localCard = LoadingCardView()
@@ -71,50 +88,103 @@ class MainViewController: UIViewController {
         localCard.onReload = { [weak self] in
             self?.reloadLocalMedia()
         }
+        localCard.onSettings = { [weak self] in
+            self?.openLocalAlbumSettings()
+        }
         
         webDAVCard = LoadingCardView()
         webDAVCard.titleLabel.text = "WebDAV"
         webDAVCard.onReload = { [weak self] in
             self?.reloadWebDAVMedia()
         }
+        webDAVCard.onSettings = { [weak self] in
+            self?.openWebDAVSettings()
+        }
         
         cardsStack = UIStackView(arrangedSubviews: [localCard, webDAVCard])
         cardsStack.axis = .vertical
-        cardsStack.spacing = 16
+        cardsStack.spacing = 18
         cardsStack.distribution = .fillEqually
         cardsStack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(cardsStack)
         
         // Play button
         playButton = UIButton(type: .system)
-        playButton.setTitle("播放幻灯片", for: .normal)
-        playButton.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
+        playButton.setTitle("开始播放", for: .normal)
+        playButton.titleLabel?.font = UIFont.systemFont(ofSize: 28, weight: .bold)
         playButton.setTitleColor(.white, for: .normal)
-        playButton.backgroundColor = UIColor.systemBlue
-        playButton.layer.cornerRadius = 12
+        playButton.backgroundColor = UIColor.systemGreen
+        playButton.layer.cornerRadius = 18
         playButton.translatesAutoresizingMaskIntoConstraints = false
         playButton.addTarget(self, action: #selector(startSlideShow), for: .touchUpInside)
         playButton.isEnabled = false
         playButton.alpha = 0.5
         view.addSubview(playButton)
         
+        // Settings entry (simple tap)
+        let settingsButton = UIButton(type: .system)
+        settingsButton.setTitle("设置", for: .normal)
+        settingsButton.setTitleColor(.systemBlue, for: .normal)
+        settingsButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        settingsButton.translatesAutoresizingMaskIntoConstraints = false
+        settingsButton.addTarget(self, action: #selector(openSettings), for: .touchUpInside)
+        view.addSubview(settingsButton)
+        
         NSLayoutConstraint.activate([
-            settingsBtn.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            settingsBtn.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 18),
+            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
-            cardsStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 60),
+            hintLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
+            hintLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
+            cardsStack.topAnchor.constraint(equalTo: hintLabel.bottomAnchor, constant: 22),
             cardsStack.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
             cardsStack.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            localCard.heightAnchor.constraint(equalToConstant: 100),
-            webDAVCard.heightAnchor.constraint(equalToConstant: 100),
+            localCard.heightAnchor.constraint(equalToConstant: 120),
+            webDAVCard.heightAnchor.constraint(equalToConstant: 120),
             
-            playButton.topAnchor.constraint(equalTo: cardsStack.bottomAnchor, constant: 30),
-            playButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            playButton.widthAnchor.constraint(equalToConstant: 200),
-            playButton.heightAnchor.constraint(equalToConstant: 50)
+            playButton.topAnchor.constraint(equalTo: cardsStack.bottomAnchor, constant: 26),
+            playButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            playButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            playButton.heightAnchor.constraint(equalToConstant: 72),
+            
+            settingsButton.topAnchor.constraint(equalTo: playButton.bottomAnchor, constant: 14),
+            settingsButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            settingsButton.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10)
         ])
-        
-        settingsBtn.addTarget(self, action: #selector(openSettings), for: .touchUpInside)
+    }
+
+    @objc private func dismissPresentedSettings() {
+        dismiss(animated: true)
+        presentedSettingsNav = nil
+    }
+
+    private func presentSettingsRoot(_ vc: UIViewController) {
+        vc.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "关闭", style: .plain, target: self, action: #selector(dismissPresentedSettings))
+        let nav = UINavigationController(rootViewController: vc)
+        presentedSettingsNav = nav
+        if traitCollection.userInterfaceIdiom == .pad {
+            nav.modalPresentationStyle = .formSheet
+        } else {
+            nav.modalPresentationStyle = .fullScreen
+        }
+        present(nav, animated: true)
+    }
+
+    private func openLocalAlbumSettings() {
+        let vc = LocalAlbumSettingsViewController()
+        vc.onSave = {
+            NotificationCenter.default.post(name: .mediaSourceChanged, object: nil)
+        }
+        presentSettingsRoot(vc)
+    }
+
+    private func openWebDAVSettings() {
+        let vc = WebDAVSettingsViewController()
+        vc.onSave = {
+            NotificationCenter.default.post(name: .mediaSourceChanged, object: nil)
+        }
+        presentSettingsRoot(vc)
     }
     
     private func checkPermissionsAndLoad() {
@@ -148,12 +218,13 @@ class MainViewController: UIViewController {
             checkAndAutoPlay()
         }
         
-        // Setup WebDAV loading
-        let webDAVEnabled = defaults.bool(forKey: AppConstants.Keys.kWebDAVEnabled)
+        // Setup WebDAV loading (iCloud synced)
+        let webDAVSettings = WebDAVSettingsManager.shared
+        let webDAVEnabled = webDAVSettings.bool(forKey: AppConstants.Keys.kWebDAVEnabled)
         if webDAVEnabled,
-           let host = defaults.string(forKey: AppConstants.Keys.kWebDAVHost), !host.isEmpty,
-           let user = defaults.string(forKey: AppConstants.Keys.kWebDAVUser),
-           let pass = defaults.string(forKey: AppConstants.Keys.kWebDAVPassword) {
+           let host = webDAVSettings.string(forKey: AppConstants.Keys.kWebDAVHost), !host.isEmpty,
+           let user = webDAVSettings.string(forKey: AppConstants.Keys.kWebDAVUser),
+           let pass = webDAVSettings.string(forKey: AppConstants.Keys.kWebDAVPassword) {
             webDAVCard.state = .loading
             webDAVLoadingState = .loading
             loadWebDAVMedia()
@@ -185,10 +256,10 @@ class MainViewController: UIViewController {
     }
     
     private func loadWebDAVMedia() {
-        let defaults = UserDefaults.standard
-        guard let host = defaults.string(forKey: AppConstants.Keys.kWebDAVHost), !host.isEmpty,
-              let user = defaults.string(forKey: AppConstants.Keys.kWebDAVUser),
-              let pass = defaults.string(forKey: AppConstants.Keys.kWebDAVPassword) else {
+        let settings = WebDAVSettingsManager.shared
+        guard let host = settings.string(forKey: AppConstants.Keys.kWebDAVHost), !host.isEmpty,
+              let user = settings.string(forKey: AppConstants.Keys.kWebDAVUser),
+              let pass = settings.string(forKey: AppConstants.Keys.kWebDAVPassword) else {
             DispatchQueue.main.async {
                 self.webDAVCard.state = .error(message: "配置不完整")
                 self.webDAVLoadingState = .error(message: "配置不完整")
@@ -203,39 +274,124 @@ class MainViewController: UIViewController {
         // Keep reference to prevent deallocation before callback completes
         self.webDAVClient = client
         
-        // Use selected folder path, default to root if not set
-        let selectedPath = defaults.string(forKey: AppConstants.Keys.kWebDAVSelectedPath) ?? "/"
+        // Use selected folder paths. If none selected, treat as incomplete config (do NOT default to root).
+        let selectedPaths = settings.stringArray(forKey: AppConstants.Keys.kWebDAVSelectedPaths)
+        let rawPaths = (selectedPaths?.isEmpty == false) ? (selectedPaths ?? []) : []
         
-        print("MainViewController: Loading WebDAV folder: \(selectedPath)")
+        func normalizeWebDAVPath(_ path: String) -> String {
+            var p = path.trimmingCharacters(in: .whitespacesAndNewlines)
+            if p.isEmpty { return "/" }
+            if !p.hasPrefix("/") { p = "/" + p }
+            // Remove trailing slash except for root.
+            if p.count > 1, p.hasSuffix("/") {
+                p = String(p.dropLast())
+            }
+            return p
+        }
         
-        // Set a timeout for WebDAV loading
-        let startTime = Date()
-        client.listDirectory(path: selectedPath) { [weak self] remoteItems in
-            guard let self = self else { return }
-            let elapsed = Date().timeIntervalSince(startTime)
-            print("MainViewController: Loaded \(remoteItems.count) items from WebDAV (took \(String(format: "%.2f", elapsed))s)")
-            self.webDAVItemsCount = remoteItems.count
-            
+        // De-dupe and remove redundant subpaths:
+        // If `/a` is selected, then `/a/b` is unnecessary because listDirectory is recursive.
+        let normalizedUnique = Array(Set(rawPaths.map(normalizeWebDAVPath))).sorted { $0.count < $1.count }
+        var pruned: [String] = []
+        for candidate in normalizedUnique {
+            // Root covers everything.
+            if pruned.contains("/") { break }
+            let isRedundant = pruned.contains { parent in
+                if parent == "/" { return true }
+                return candidate == parent || candidate.hasPrefix(parent + "/")
+            }
+            if !isRedundant {
+                pruned.append(candidate)
+            }
+        }
+        
+        let paths = pruned
+        guard !paths.isEmpty else {
             DispatchQueue.main.async {
-                self.allItems.append(contentsOf: remoteItems)
-                // If loading took very long and got 0 items, might indicate an error
-                // But we'll still show it as completed since WebDAVClient doesn't provide error details
-                if remoteItems.count == 0 && elapsed > 10 {
-                    // Likely an error, but we can't be sure - show as completed with 0 items
-                    self.webDAVCard.state = .completed(count: 0)
-                    self.webDAVLoadingState = .completed(count: 0)
-                } else {
-                    self.webDAVCard.state = .completed(count: remoteItems.count)
-                    self.webDAVLoadingState = .completed(count: remoteItems.count)
-                }
-                // Clear reference after loading completes
+                self.webDAVCard.state = .disabled(message: "未选择文件夹")
+                self.webDAVLoadingState = .disabled(message: "未选择文件夹")
                 self.webDAVClient = nil
                 self.checkAndAutoPlay()
             }
+            return
+        }
+        print("MainViewController: Loading WebDAV folders: \(paths)")
+        
+        let startTime = Date()
+        let group = DispatchGroup()
+        var allRemoteItems: [UnifiedMediaItem] = []
+        let lock = NSLock()
+        
+        for path in paths {
+            group.enter()
+            client.listDirectory(path: path) { items in
+                lock.lock()
+                allRemoteItems.append(contentsOf: items)
+                lock.unlock()
+                group.leave()
+            }
+        }
+        
+        group.notify(queue: .main) { [weak self] in
+            guard let self = self else { return }
+            let elapsed = Date().timeIntervalSince(startTime)
+            
+            // De-duplicate by remote URL
+            var seen = Set<String>()
+            let deduped: [UnifiedMediaItem] = allRemoteItems.filter { item in
+                guard let url = item.remoteURL else { return true }
+                let key = url.absoluteString
+                if seen.contains(key) { return false }
+                seen.insert(key)
+                return true
+            }
+            
+            // Sort by creationDate desc if available (fallback keeps relative order)
+            let sorted = deduped.sorted { a, b in
+                switch (a.creationDate, b.creationDate) {
+                case let (da?, db?):
+                    return da > db
+                case (_?, nil):
+                    return true
+                case (nil, _?):
+                    return false
+                default:
+                    return false
+                }
+            }
+            
+            print("MainViewController: Loaded \(sorted.count) items from WebDAV \(paths.count) folder(s) (took \(String(format: "%.2f", elapsed))s)")
+            self.webDAVItemsCount = sorted.count
+            self.allItems.append(contentsOf: sorted)
+            
+            // If loading took very long and got 0 items, might indicate an error
+            if sorted.count == 0 && elapsed > 10 {
+                self.webDAVCard.state = .completed(count: 0)
+                self.webDAVLoadingState = .completed(count: 0)
+            } else {
+                self.webDAVCard.state = .completed(count: sorted.count)
+                self.webDAVLoadingState = .completed(count: sorted.count)
+            }
+            
+            self.webDAVClient = nil
+            self.checkAndAutoPlay()
         }
     }
     
     private func reloadLocalMedia() {
+        // Respect local album enable switch
+        let defaults = UserDefaults.standard
+        let localEnabled = defaults.object(forKey: AppConstants.Keys.kLocalAlbumEnabled) as? Bool ?? true
+        guard localEnabled else {
+            // Remove old local items and show disabled state
+            allItems = allItems.filter { $0.remoteURL != nil }
+            localItemsCount = 0
+            localCard.state = .disabled(message: "未开启")
+            localLoadingState = .disabled(message: "未开启")
+            checkAndAutoPlay()
+            return
+        }
+        
         localCard.state = .loading
         localLoadingState = .loading
         
@@ -257,6 +413,31 @@ class MainViewController: UIViewController {
     }
     
     private func reloadWebDAVMedia() {
+        // Respect WebDAV enable switch and config completeness
+        let settings = WebDAVSettingsManager.shared
+        let webDAVEnabled = settings.bool(forKey: AppConstants.Keys.kWebDAVEnabled)
+        guard webDAVEnabled else {
+            // Remove old WebDAV items and show disabled state
+            allItems = allItems.filter { $0.localAsset != nil }
+            webDAVItemsCount = 0
+            webDAVCard.state = .disabled(message: "未开启")
+            webDAVLoadingState = .disabled(message: "未开启")
+            checkAndAutoPlay()
+            return
+        }
+        
+        guard let host = settings.string(forKey: AppConstants.Keys.kWebDAVHost), !host.isEmpty,
+              let _ = settings.string(forKey: AppConstants.Keys.kWebDAVUser),
+              let _ = settings.string(forKey: AppConstants.Keys.kWebDAVPassword) else {
+            // Remove old WebDAV items and show config error
+            allItems = allItems.filter { $0.localAsset != nil }
+            webDAVItemsCount = 0
+            webDAVCard.state = .disabled(message: "配置不完整")
+            webDAVLoadingState = .disabled(message: "配置不完整")
+            checkAndAutoPlay()
+            return
+        }
+        
         webDAVCard.state = .loading
         webDAVLoadingState = .loading
         
@@ -289,6 +470,13 @@ class MainViewController: UIViewController {
         let canPlay = !allItems.isEmpty
         playButton.isEnabled = canPlay
         playButton.alpha = canPlay ? 1.0 : 0.5
+        if canPlay {
+            hintLabel.text = "点“开始播放”就能看照片啦"
+            startPlayButtonPulseIfNeeded()
+        } else {
+            hintLabel.text = "正在准备照片…"
+            stopPlayButtonPulse()
+        }
         
         // Auto play when both are done and we have items
         if localDone && webDAVDone && !hasAutoPlayed && !allItems.isEmpty {
@@ -298,6 +486,23 @@ class MainViewController: UIViewController {
                 self?.startSlideShow()
             }
         }
+    }
+
+    private func startPlayButtonPulseIfNeeded() {
+        // Avoid stacking animations
+        if playButton.layer.animation(forKey: "pulse") != nil { return }
+        let anim = CABasicAnimation(keyPath: "transform.scale")
+        anim.fromValue = 1.0
+        anim.toValue = 1.04
+        anim.duration = 0.9
+        anim.autoreverses = true
+        anim.repeatCount = .infinity
+        anim.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        playButton.layer.add(anim, forKey: "pulse")
+    }
+    
+    private func stopPlayButtonPulse() {
+        playButton.layer.removeAnimation(forKey: "pulse")
     }
     
     @objc private func startSlideShow() {

@@ -69,11 +69,11 @@ class PhotoService {
                 return
             }
             
-            // Get WebDAV credentials from UserDefaults
-            let defaults = UserDefaults.standard
-            guard let host = defaults.string(forKey: AppConstants.Keys.kWebDAVHost), !host.isEmpty,
-                  let user = defaults.string(forKey: AppConstants.Keys.kWebDAVUser),
-                  let pass = defaults.string(forKey: AppConstants.Keys.kWebDAVPassword) else {
+            // Get WebDAV credentials (iCloud synced)
+            let settings = WebDAVSettingsManager.shared
+            guard let host = settings.string(forKey: AppConstants.Keys.kWebDAVHost), !host.isEmpty,
+                  let user = settings.string(forKey: AppConstants.Keys.kWebDAVUser),
+                  let pass = settings.string(forKey: AppConstants.Keys.kWebDAVPassword) else {
                 print("PhotoService: No WebDAV credentials found")
                 DispatchQueue.main.async {
                     completion(nil)
@@ -139,11 +139,11 @@ class PhotoService {
                 return
             }
             
-            // Get WebDAV credentials from UserDefaults
-            let defaults = UserDefaults.standard
-            guard let host = defaults.string(forKey: AppConstants.Keys.kWebDAVHost), !host.isEmpty,
-                  let user = defaults.string(forKey: AppConstants.Keys.kWebDAVUser),
-                  let pass = defaults.string(forKey: AppConstants.Keys.kWebDAVPassword) else {
+            // Get WebDAV credentials (iCloud synced)
+            let settings = WebDAVSettingsManager.shared
+            guard let host = settings.string(forKey: AppConstants.Keys.kWebDAVHost), !host.isEmpty,
+                  let user = settings.string(forKey: AppConstants.Keys.kWebDAVUser),
+                  let pass = settings.string(forKey: AppConstants.Keys.kWebDAVPassword) else {
                 print("PhotoService: No WebDAV credentials found for video")
                 DispatchQueue.main.async {
                     completion(nil)

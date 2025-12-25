@@ -69,6 +69,6 @@ DoraPhotoAlbum/
 
 ## 许可协议
 
-如需添加开源协议（MIT/Apache-2.0 等），请告诉我你希望使用的协议类型，我可以补充 `LICENSE` 文件与 README 对应说明。
+MIT License
 
 

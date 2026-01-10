@@ -48,7 +48,7 @@ class WebDAVClient: NSObject, XMLParserDelegate {
     init(config: WebDAVConfig) {
         self.config = config
         let configuration = URLSessionConfiguration.default
-        configuration.timeoutIntervalForRequest = 30
+        configuration.timeoutIntervalForRequest = 15
         configuration.timeoutIntervalForResource = 60
         configuration.httpMaximumConnectionsPerHost = 10
         configuration.urlCache = nil // Disable cache to ensure we get fresh data

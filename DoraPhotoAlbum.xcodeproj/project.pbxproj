@@ -627,6 +627,7 @@
 				INFOPLIST_FILE = DoraPhotoAlbum/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "哆啦相册";
 				INFOPLIST_KEY_NSAppleMusicUsageDescription = "需要访问您的媒体库以播放背景音乐。";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "需要将缓存的图片和视频保存到您的相册。";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "需要访问您的相册以在电子相册中展示照片。";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
@@ -664,6 +665,7 @@
 				INFOPLIST_FILE = DoraPhotoAlbum/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "哆啦相册";
 				INFOPLIST_KEY_NSAppleMusicUsageDescription = "需要访问您的媒体库以播放背景音乐。";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "需要将缓存的图片和视频保存到您的相册。";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "需要访问您的相册以在电子相册中展示照片。";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;

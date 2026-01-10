@@ -31,6 +31,8 @@ struct AppConstants {
         static let kClockShowSeconds = "kClockShowSeconds"
         static let kClockShowDate = "kClockShowDate"
         static let kClockTheme = "kClockTheme" // 0: Digital, 1: Analog
+        // Voice chime: 0 = off, 1 = half-hour, 2 = hourly
+        static let kClockChimeMode = "kClockChimeMode"
     }
     
     struct Defaults {
@@ -52,6 +54,7 @@ struct AppConstants {
         static let clockFormat24H: Bool = true // 24小时制：true=开启
         static let clockShowSeconds: Bool = true // 显示秒：true=开启
         static let clockShowDate: Bool = true // 显示日期：true=开启
+        static let clockChimeMode: Int = 0 // 语音报时：0=关闭, 1=半点报时, 2=整点报时
         
         // Schedule Settings
         static let sleepEnabled: Bool = false // 休眠时间：false=关闭

@@ -25,6 +25,7 @@ class ClockSettingsViewController: UIViewController, UITableViewDataSource, UITa
         case format24Hour
         case showSeconds
         case showDate
+        case chimeMode
         
         var title: String {
             switch self {
@@ -33,6 +34,7 @@ class ClockSettingsViewController: UIViewController, UITableViewDataSource, UITa
             case .format24Hour: return "24小时制"
             case .showSeconds: return "显示秒"
             case .showDate: return "显示日期"
+            case .chimeMode: return "语音报时"
             }
         }
         
@@ -43,13 +45,14 @@ class ClockSettingsViewController: UIViewController, UITableViewDataSource, UITa
             case .format24Hour: return AppConstants.Keys.kClockFormat24H
             case .showSeconds: return AppConstants.Keys.kClockShowSeconds
             case .showDate: return AppConstants.Keys.kClockShowDate
+            case .chimeMode: return AppConstants.Keys.kClockChimeMode
             }
         }
     }
     
     private let rows: [[Row]] = [
         [.startInClockMode, .theme],
-        [.format24Hour, .showSeconds, .showDate]
+        [.format24Hour, .showSeconds, .showDate, .chimeMode]
     ]
     
     // MARK: - Lifecycle
@@ -117,6 +120,23 @@ class ClockSettingsViewController: UIViewController, UITableViewDataSource, UITa
             cell.detailTextLabel?.text = (currentTheme == 0) ? "数字时钟" : "圆盘时钟"
             cell.accessoryType = .disclosureIndicator
             cell.accessoryView = nil
+        } else if row == .chimeMode {
+            let mode: Int
+            if UserDefaults.standard.object(forKey: row.key) != nil {
+                mode = UserDefaults.standard.integer(forKey: row.key)
+            } else {
+                mode = AppConstants.Defaults.clockChimeMode
+            }
+            switch mode {
+            case 1:
+                cell.detailTextLabel?.text = "半点报时"
+            case 2:
+                cell.detailTextLabel?.text = "整点报时"
+            default:
+                cell.detailTextLabel?.text = "关闭"
+            }
+            cell.accessoryType = .disclosureIndicator
+            cell.accessoryView = nil
         } else {
             // Switch
             let switchControl = UISwitch()
@@ -154,8 +174,42 @@ class ClockSettingsViewController: UIViewController, UITableViewDataSource, UITa
         let row = rows[indexPath.section][indexPath.row]
         if row == .theme {
             showThemeSelection()
+        } else if row == .chimeMode {
+            showChimeModeSelection()
         }
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+
+    private func showChimeModeSelection() {
+        let alert = UIAlertController(title: "语音报时", message: nil, preferredStyle: .actionSheet)
+        
+        alert.addAction(UIAlertAction(title: "关闭", style: .default, handler: { _ in
+            UserDefaults.standard.set(0, forKey: AppConstants.Keys.kClockChimeMode)
+            NotificationCenter.default.post(name: .clockSettingsChanged, object: nil)
+            self.tableView.reloadData()
+        }))
+        
+        alert.addAction(UIAlertAction(title: "半点报时", style: .default, handler: { _ in
+            UserDefaults.standard.set(1, forKey: AppConstants.Keys.kClockChimeMode)
+            NotificationCenter.default.post(name: .clockSettingsChanged, object: nil)
+            self.tableView.reloadData()
+        }))
+        
+        alert.addAction(UIAlertAction(title: "整点报时", style: .default, handler: { _ in
+            UserDefaults.standard.set(2, forKey: AppConstants.Keys.kClockChimeMode)
+            NotificationCenter.default.post(name: .clockSettingsChanged, object: nil)
+            self.tableView.reloadData()
+        }))
+        
+        alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
+        
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = self.view
+            popover.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 0, height: 0)
+            popover.permittedArrowDirections = []
+        }
+        
+        present(alert, animated: true, completion: nil)
     }
     
     private func showThemeSelection() {

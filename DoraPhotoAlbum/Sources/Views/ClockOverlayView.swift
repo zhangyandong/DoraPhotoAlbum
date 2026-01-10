@@ -1,4 +1,5 @@
 import UIKit
+import AVFoundation
 
 class ClockOverlayView: UIView {
     
@@ -84,6 +85,10 @@ class ClockOverlayView: UIView {
     
     private var timer: Timer?
     private var calendar = Calendar.current
+    
+    // Hourly chime
+    private let speechSynthesizer = AVSpeechSynthesizer()
+    private var lastChimeKey: String?
     
     // MARK: - Lifecycle
     
@@ -335,6 +340,8 @@ class ClockOverlayView: UIView {
             let blinkAlpha: CGFloat = (second % 2 == 0) ? on : off
             colon1Label.alpha = blinkAlpha
         }
+
+        handleHourlyChimeIfNeeded(now: now, hour24: hour24, minute: minute, second: second, is24Hour: is24Hour)
         
         // Date Format
         if !dateLabel.isHidden {
@@ -345,6 +352,102 @@ class ClockOverlayView: UIView {
             dateFormatter.locale = Locale.current
             dateLabel.text = dateFormatter.string(from: now)
         }
+    }
+    
+    private func handleHourlyChimeIfNeeded(now: Date, hour24: Int, minute: Int, second: Int, is24Hour: Bool) {
+        let mode: Int
+        if UserDefaults.standard.object(forKey: AppConstants.Keys.kClockChimeMode) != nil {
+            mode = UserDefaults.standard.integer(forKey: AppConstants.Keys.kClockChimeMode)
+        } else {
+            mode = AppConstants.Defaults.clockChimeMode
+        }
+        // 0 = off, 1 = half-hour, 2 = hourly
+        guard mode != 0 else { return }
+        
+        guard second == 0 else { return }
+        
+        let shouldChime: Bool
+        let isHalfHour: Bool
+        if mode == 2 {
+            // Hourly: only at :00
+            shouldChime = (minute == 0)
+            isHalfHour = false
+        } else {
+            // Half-hour mode: chime at :00 and :30
+            shouldChime = (minute == 0 || minute == 30)
+            isHalfHour = (minute == 30)
+        }
+        guard shouldChime else { return }
+        
+        // De-dupe within the same minute mark (updateTime can be called multiple times).
+        let key = "\(calendar.component(.year, from: now))-\(calendar.component(.month, from: now))-\(calendar.component(.day, from: now))-\(hour24)-\(minute)"
+        guard lastChimeKey != key else { return }
+        lastChimeKey = key
+        
+        speakChime(now: now, hour24: hour24, minute: minute, is24Hour: is24Hour, isHalfHour: isHalfHour)
+    }
+    
+    private func speakChime(now: Date, hour24: Int, minute: Int, is24Hour: Bool, isHalfHour: Bool) {
+        // If something is already speaking, don't overlap.
+        if speechSynthesizer.isSpeaking {
+            speechSynthesizer.stopSpeaking(at: .immediate)
+        }
+        
+        let language = Locale.current.languageCode ?? "zh"
+        let text: String
+        if language.hasPrefix("zh") {
+            if isHalfHour {
+                if is24Hour {
+                    text = "现在是\(hour24)点半"
+                } else {
+                    let h = hour24 % 12
+                    let hour12 = (h == 0 ? 12 : h)
+                    let ampmFormatter = DateFormatter()
+                    ampmFormatter.locale = Locale.current
+                    ampmFormatter.dateFormat = "a"
+                    let ampm = ampmFormatter.string(from: now)
+                    text = "现在是\(ampm)\(hour12)点半"
+                }
+            } else {
+                if is24Hour {
+                    text = "现在是\(hour24)点整"
+                } else {
+                    let h = hour24 % 12
+                    let hour12 = (h == 0 ? 12 : h)
+                    let ampmFormatter = DateFormatter()
+                    ampmFormatter.locale = Locale.current
+                    ampmFormatter.dateFormat = "a"
+                    let ampm = ampmFormatter.string(from: now)
+                    text = "现在是\(ampm)\(hour12)点整"
+                }
+            }
+        } else {
+            // Simple English fallback
+            let h = is24Hour ? hour24 : ((hour24 % 12 == 0) ? 12 : (hour24 % 12))
+            text = isHalfHour ? "It's \(h) thirty." : "It's \(h) o'clock."
+        }
+        
+        // Configure audio session to duck other audio slightly (e.g. background music).
+        let session = AVAudioSession.sharedInstance()
+        do {
+            if #available(iOS 10.0, *) {
+                try session.setCategory(.playback, mode: .spokenAudio, options: [.duckOthers, .mixWithOthers])
+            } else {
+                try session.setCategory(.playback, options: [.duckOthers, .mixWithOthers])
+            }
+            try session.setActive(true)
+        } catch {
+            // If audio session fails, still attempt to speak.
+            print("ClockOverlayView: Failed to configure audio session for chime: \(error)")
+        }
+        
+        let utterance = AVSpeechUtterance(string: text)
+        utterance.rate = AVSpeechUtteranceDefaultSpeechRate
+        // Prefer the current locale voice when possible.
+        if let code = Locale.current.languageCode {
+            utterance.voice = AVSpeechSynthesisVoice(language: code)
+        }
+        speechSynthesizer.speak(utterance)
     }
     
     // Adjust font size for iPad vs iPhone if needed, or rely on Auto Layout scaling?
@@ -472,9 +575,10 @@ class ClockOverlayView: UIView {
                 let ampmSize = max(14, baseSize * ampmScale)
                 let ampmFont = makeRoundedDateFont(size: ampmSize)
                 
-                // Widths (digits are monospaced, so "88" is a safe max)
-                let hourW = ceil(("88" as NSString).size(withAttributes: [.font: timeFont]).width)
-                let minW = ceil(("88" as NSString).size(withAttributes: [.font: timeFont]).width)
+                // Widths: even with pinned widths, some fonts can render "00"/"08" slightly wider than "88"
+                // due to side bearings. Use a worst-case measurement + padding to avoid clipping.
+                let hourW = maxDigitPairWidth(font: timeFont)
+                let minW = maxDigitPairWidth(font: timeFont)
                 let secW = ceil(("88" as NSString).size(withAttributes: [.font: secondsFont]).width)
                 let colonW = ceil((":"
                     as NSString).size(withAttributes: [.font: timeFont]).width)
@@ -544,8 +648,8 @@ class ClockOverlayView: UIView {
             dateLabel.font = makeRoundedDateFont(size: bestDate)
             
             // Pin digit widths to avoid jitter (hour varies 1..12 or 0..23).
-            hourWidthConstraint?.constant = ceil(("88" as NSString).size(withAttributes: [.font: hmFont]).width)
-            minuteWidthConstraint?.constant = ceil(("88" as NSString).size(withAttributes: [.font: hmFont]).width)
+            hourWidthConstraint?.constant = maxDigitPairWidth(font: hmFont)
+            minuteWidthConstraint?.constant = maxDigitPairWidth(font: hmFont)
             secondWidthConstraint?.constant = ceil(("88" as NSString).size(withAttributes: [.font: secondLabel.font as Any]).width)
             
             // No colon between minute and second; use a small visual gap when seconds are shown.
@@ -583,6 +687,16 @@ class ClockOverlayView: UIView {
             analogClock?.showsDateInDial = s.showDate
             analogClock?.setNeedsLayout()
         }
+    }
+
+    private func maxDigitPairWidth(font: UIFont) -> CGFloat {
+        // Measure a few likely "worst" combinations and add a small safety padding.
+        let samples = ["00", "08", "59", "88"]
+        let maxW = samples.map { s -> CGFloat in
+            let w = (s as NSString).size(withAttributes: [.font: font]).width
+            return ceil(w)
+        }.max() ?? 0
+        return maxW + 4 // padding to prevent edge clipping
     }
     
     private func maxTimeStringWidth(settings: ClockDisplaySettings, font: UIFont) -> CGFloat {

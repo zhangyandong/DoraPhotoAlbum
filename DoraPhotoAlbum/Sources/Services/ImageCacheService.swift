@@ -301,5 +301,32 @@ class ImageCacheService {
             return UnifiedMediaItem(cachedFileURL: fileURL, type: type, date: modDate)
         }
     }
+
+    // MARK: - Cache File Management (for Cache Browser UI)
+
+    /// Delete cached files at given file URLs (must be inside cache directory).
+    /// Returns number of successfully deleted files.
+    @discardableResult
+    func deleteCachedFiles(at fileURLs: [URL]) -> Int {
+        guard !fileURLs.isEmpty else { return 0 }
+        var deletedCount = 0
+        for url in fileURLs {
+            // Safety: only allow deleting within cache directory
+            let standardized = url.standardizedFileURL
+            guard standardized.path.hasPrefix(cacheDirectory.path) else { continue }
+            do {
+                try fileManager.removeItem(at: standardized)
+                deletedCount += 1
+            } catch {
+                print("ImageCacheService: Failed to delete cache file \(standardized.lastPathComponent): \(error)")
+            }
+        }
+
+        if deletedCount > 0 {
+            // Avoid showing stale thumbnails/images
+            clearMemoryCache()
+        }
+        return deletedCount
+    }
 }
 

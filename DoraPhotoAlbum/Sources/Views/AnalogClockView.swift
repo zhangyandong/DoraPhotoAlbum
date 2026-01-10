@@ -8,6 +8,8 @@ class AnalogClockView: UIView {
     private let minuteHandLayer = CAShapeLayer()
     private let secondHandLayer = CAShapeLayer()
     private let faceLayer = CAShapeLayer()
+    private let minuteTickLayer = CAShapeLayer()
+    private let hourTickLayer = CAShapeLayer()
     private let centerDotLayer = CAShapeLayer()
     private var numberLayers: [CATextLayer] = []
     private let dateLayer = CATextLayer()
@@ -52,36 +54,62 @@ class AnalogClockView: UIView {
         faceLayer.shadowOffset = CGSize(width: 2, height: 2)
         faceLayer.shadowOpacity = 0.5
         faceLayer.shadowRadius = 4
+        faceLayer.zPosition = 0
         layer.addSublayer(faceLayer)
+
+        // Tick marks (separate layers so hour ticks can be thicker)
+        minuteTickLayer.strokeColor = UIColor.white.withAlphaComponent(0.85).cgColor
+        minuteTickLayer.fillColor = UIColor.clear.cgColor
+        minuteTickLayer.lineCap = .round
+        minuteTickLayer.shadowColor = UIColor.black.cgColor
+        minuteTickLayer.shadowOffset = CGSize(width: 1, height: 1)
+        minuteTickLayer.shadowOpacity = 0.25
+        minuteTickLayer.shadowRadius = 2
+        minuteTickLayer.zPosition = 1
+        layer.addSublayer(minuteTickLayer)
         
-        // Hour Hand
+        hourTickLayer.strokeColor = UIColor.white.withAlphaComponent(0.95).cgColor
+        hourTickLayer.fillColor = UIColor.clear.cgColor
+        hourTickLayer.lineCap = .round
+        hourTickLayer.shadowColor = UIColor.black.cgColor
+        hourTickLayer.shadowOffset = CGSize(width: 1, height: 1)
+        hourTickLayer.shadowOpacity = 0.3
+        hourTickLayer.shadowRadius = 2
+        hourTickLayer.zPosition = 2
+        layer.addSublayer(hourTickLayer)
+        
+        // Hour Hand (should be above numbers)
         hourHandLayer.backgroundColor = UIColor.white.cgColor
         hourHandLayer.cornerRadius = 3
         hourHandLayer.shadowColor = UIColor.black.cgColor
         hourHandLayer.shadowOffset = CGSize(width: 1, height: 1)
         hourHandLayer.shadowOpacity = 0.5
+        hourHandLayer.zPosition = 10
         layer.addSublayer(hourHandLayer)
         
-        // Minute Hand
+        // Minute Hand (should be above numbers)
         minuteHandLayer.backgroundColor = UIColor.white.cgColor
         minuteHandLayer.cornerRadius = 2
         minuteHandLayer.shadowColor = UIColor.black.cgColor
         minuteHandLayer.shadowOffset = CGSize(width: 1, height: 1)
         minuteHandLayer.shadowOpacity = 0.5
+        minuteHandLayer.zPosition = 11
         layer.addSublayer(minuteHandLayer)
         
-        // Second Hand
+        // Second Hand (should be above numbers)
         secondHandLayer.backgroundColor = UIColor.red.cgColor
         secondHandLayer.cornerRadius = 1
         secondHandLayer.shadowColor = UIColor.black.cgColor
         secondHandLayer.shadowOffset = CGSize(width: 1, height: 1)
         secondHandLayer.shadowOpacity = 0.5
+        secondHandLayer.zPosition = 12
         layer.addSublayer(secondHandLayer)
         secondHandLayer.isHidden = !showsSecondHand
         
         // Center Dot
         centerDotLayer.path = UIBezierPath(ovalIn: CGRect(x: -4, y: -4, width: 8, height: 8)).cgPath
         centerDotLayer.fillColor = UIColor.white.cgColor
+        centerDotLayer.zPosition = 20
         layer.addSublayer(centerDotLayer)
         
         // Numbers
@@ -93,6 +121,8 @@ class AnalogClockView: UIView {
             textLayer.foregroundColor = UIColor.white.cgColor
             textLayer.alignmentMode = .center
             textLayer.contentsScale = UIScreen.main.scale
+            // Numbers should be below hands.
+            textLayer.zPosition = 5
             // Add shadow for better visibility
             textLayer.shadowColor = UIColor.black.cgColor
             textLayer.shadowOffset = CGSize(width: 1, height: 1)
@@ -112,6 +142,8 @@ class AnalogClockView: UIView {
         dateLayer.shadowOpacity = 0.8
         dateLayer.shadowRadius = 2
         dateLayer.isHidden = !showsDateInDial
+        // Date should also be below hands.
+        dateLayer.zPosition = 6
         layer.addSublayer(dateLayer)
     }
     
@@ -123,14 +155,22 @@ class AnalogClockView: UIView {
         // Increase radius to make the clock face larger (use 98% of available space)
         let radius = min(bounds.width, bounds.height) / 2 * 0.98
         
+        // Make the outer ring a bit thicker, scaled with size (but clamped).
+        faceLayer.lineWidth = max(4.0, min(8.0, radius * 0.03))
+        
         // Layout tuning: give numbers more breathing room away from tick marks.
         let tickOuterInset = max(6, radius * 0.03)              // distance from edge to tick end
-        let hourTickLength = max(24, radius * 0.14)
-        let minuteTickLength = max(14, radius * 0.08)
+        // Make ticks a bit shorter (as requested)
+        let hourTickLength = max(22, radius * 0.13)
+        let minuteTickLength = max(12, radius * 0.075)
         let numberInset = max(46, radius * 0.22)               // distance from edge to numbers
         
-        // Face Path
-        let facePath = UIBezierPath(ovalIn: CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2))
+        // Ring path (dial outline)
+        let ringPath = UIBezierPath(ovalIn: CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2))
+        
+        // Tick paths (separate so hour ticks can be thicker)
+        let minuteTicksPath = UIBezierPath()
+        let hourTicksPath = UIBezierPath()
         
         // Add markers
         for i in 0..<60 {
@@ -143,11 +183,22 @@ class AnalogClockView: UIView {
             let start = CGPoint(x: center.x + innerRadius * sin(angle), y: center.y - innerRadius * cos(angle))
             let end = CGPoint(x: center.x + outerRadius * sin(angle), y: center.y - outerRadius * cos(angle))
             
-            facePath.move(to: start)
-            facePath.addLine(to: end)
+            if isHourMark {
+                hourTicksPath.move(to: start)
+                hourTicksPath.addLine(to: end)
+            } else {
+                minuteTicksPath.move(to: start)
+                minuteTicksPath.addLine(to: end)
+            }
         }
         
-        faceLayer.path = facePath.cgPath
+        faceLayer.path = ringPath.cgPath
+        minuteTickLayer.path = minuteTicksPath.cgPath
+        hourTickLayer.path = hourTicksPath.cgPath
+        
+        // Outer ring thicker; tick marks thinner.
+        minuteTickLayer.lineWidth = max(0.9, min(1.6, radius * 0.007))
+        hourTickLayer.lineWidth = max(1.4, min(2.4, radius * 0.010))
         
         // Update Numbers
         let numberRadius = radius - numberInset
@@ -159,8 +210,8 @@ class AnalogClockView: UIView {
             
             // Adjust font size based on clock size
             let fontSize = max(12, radius * 0.145)
-            // Not bold: keep numbers clean and readable.
-            textLayer.font = UIFont.systemFont(ofSize: fontSize, weight: .regular)
+            // Make numbers bold as requested.
+            textLayer.font = UIFont.systemFont(ofSize: fontSize, weight: .bold)
             textLayer.fontSize = fontSize
             
             let size = textLayer.preferredFrameSize()
@@ -169,7 +220,7 @@ class AnalogClockView: UIView {
         
         // Date label inside dial (lower half, centered)
         if showsDateInDial {
-            let dateFontSize = max(10, radius * 0.12) // smaller than numbers, scales with dial
+            let dateFontSize = max(9, radius * 0.095) // smaller, scales with dial
             dateLayer.fontSize = dateFontSize
             dateLayer.font = UIFont.systemFont(ofSize: dateFontSize, weight: .regular)
             
@@ -205,6 +256,11 @@ class AnalogClockView: UIView {
         
         // Update Center Dot Position
         centerDotLayer.position = center
+        // Make center dot larger (scaled with dial size, clamped)
+        let dotDiameter = max(12.0, min(22.0, radius * 0.075))
+        centerDotLayer.path = UIBezierPath(
+            ovalIn: CGRect(x: -dotDiameter / 2, y: -dotDiameter / 2, width: dotDiameter, height: dotDiameter)
+        ).cgPath
         
         // Force update hands immediately to new position
         updateTime()

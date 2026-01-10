@@ -324,14 +324,22 @@ class MainViewController: UIViewController {
         let startTime = Date()
         let group = DispatchGroup()
         var allRemoteItems: [UnifiedMediaItem] = []
+        var anyPathFailed = false
         let lock = NSLock()
+        let successLock = NSLock()
         
         for path in paths {
             group.enter()
-            client.listDirectory(path: path) { items in
+            client.listDirectory(path: path) { items, didSucceed in
                 lock.lock()
                 allRemoteItems.append(contentsOf: items)
                 lock.unlock()
+                
+                if !didSucceed {
+                    successLock.lock()
+                    anyPathFailed = true
+                    successLock.unlock()
+                }
                 group.leave()
             }
         }
@@ -365,16 +373,37 @@ class MainViewController: UIViewController {
             }
             
             print("MainViewController: Loaded \(sorted.count) items from WebDAV \(paths.count) folder(s) (took \(String(format: "%.2f", elapsed))s)")
-            self.webDAVItemsCount = sorted.count
-            self.allItems.append(contentsOf: sorted)
+            
+            let allSucceeded = !anyPathFailed
+            
+            var finalItems = sorted
+            var usedOfflineCache = false
+            
+            // If WebDAV fetch failed and got 0 items, fallback to enumerating the cache directory directly.
+            // This avoids relying on "last successful list" state.
+            if finalItems.isEmpty && !allSucceeded {
+                let cached = ImageCacheService.shared.listCachedMediaItems()
+                if !cached.isEmpty {
+                    finalItems = cached
+                    usedOfflineCache = true
+                    print("MainViewController: WebDAV failed; using cache directory items: \(cached.count)")
+                }
+            }
+            
+            self.webDAVItemsCount = finalItems.count
+            self.allItems.append(contentsOf: finalItems)
             
             // If loading took very long and got 0 items, might indicate an error
-            if sorted.count == 0 && elapsed > 10 {
-                self.webDAVCard.state = .completed(count: 0)
-                self.webDAVLoadingState = .completed(count: 0)
+            if usedOfflineCache {
+                let message = "WebDAV 加载失败，已从缓存目录加载 \(finalItems.count) 个项目"
+                self.webDAVCard.state = .completed(count: finalItems.count, message: message)
+                self.webDAVLoadingState = .completed(count: finalItems.count, message: message)
+            } else if finalItems.count == 0 && !allSucceeded {
+                self.webDAVCard.state = .error(message: "WebDAV 加载失败（缓存目录为空）")
+                self.webDAVLoadingState = .error(message: "WebDAV 加载失败（缓存目录为空）")
             } else {
-                self.webDAVCard.state = .completed(count: sorted.count)
-                self.webDAVLoadingState = .completed(count: sorted.count)
+                self.webDAVCard.state = .completed(count: finalItems.count)
+                self.webDAVLoadingState = .completed(count: finalItems.count)
             }
             
             self.webDAVClient = nil
@@ -471,19 +500,28 @@ class MainViewController: UIViewController {
         }
         
         // Update play button state
-        let canPlay = !allItems.isEmpty
-        playButton.isEnabled = canPlay
-        playButton.alpha = canPlay ? 1.0 : 0.5
-        if canPlay {
+        let canPlayMedia = !allItems.isEmpty
+        let canShowClock = localDone && webDAVDone && allItems.isEmpty
+        
+        playButton.isEnabled = canPlayMedia || canShowClock
+        playButton.alpha = (canPlayMedia || canShowClock) ? 1.0 : 0.5
+        
+        if canPlayMedia {
+            playButton.setTitle("开始播放", for: .normal)
             hintLabel.text = "点“开始播放”就能看照片啦"
             startPlayButtonPulseIfNeeded()
+        } else if canShowClock {
+            playButton.setTitle("显示时钟", for: .normal)
+            hintLabel.text = "没有照片也没关系，可以当时钟用"
+            startPlayButtonPulseIfNeeded()
         } else {
+            playButton.setTitle("开始播放", for: .normal)
             hintLabel.text = "正在准备照片…"
             stopPlayButtonPulse()
         }
         
-        // Auto play when both are done and we have items
-        if localDone && webDAVDone && !hasAutoPlayed && !allItems.isEmpty {
+        // Auto play when both are done and we have items (or show clock when empty)
+        if localDone && webDAVDone && !hasAutoPlayed && (canPlayMedia || canShowClock) {
             hasAutoPlayed = true
             // Small delay to show completion state
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
@@ -510,7 +548,6 @@ class MainViewController: UIViewController {
     }
     
     @objc private func startSlideShow() {
-        guard !allItems.isEmpty else { return }
         let slideVC = SlideShowViewController()
         slideVC.items = allItems.shuffled()
         slideVC.modalPresentationStyle = .fullScreen

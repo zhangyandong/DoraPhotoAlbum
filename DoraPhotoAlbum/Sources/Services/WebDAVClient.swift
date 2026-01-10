@@ -18,7 +18,8 @@ class WebDAVClient: NSObject, XMLParserDelegate {
     private var currentIsCollection = false
     
     private var resources: [WebDAVResource] = []
-    private var parseCompletion: (([WebDAVResource]) -> Void)?
+    private var parseCompletion: (([WebDAVResource], Bool) -> Void)?
+    private var didCompleteParse = false
     
     struct WebDAVResource {
         let href: String
@@ -116,7 +117,7 @@ class WebDAVClient: NSObject, XMLParserDelegate {
                 }
             }
             
-            self.parseWebDAVResponse(data) { resources in
+            self.parseWebDAVResponse(data) { resources, _ in
                 // Filter out the current directory itself
                 // Handle both absolute and relative hrefs
                 let filtered = resources.filter { res in
@@ -191,11 +192,11 @@ class WebDAVClient: NSObject, XMLParserDelegate {
     }
     
     // Recursively list directory and all subdirectories
-    func listDirectory(path: String, completion: @escaping ([UnifiedMediaItem]) -> Void) {
+    func listDirectory(path: String, completion: @escaping ([UnifiedMediaItem], Bool) -> Void) {
         listDirectoryRecursive(path: path, allItems: [], completion: completion)
     }
     
-    private func listDirectoryRecursive(path: String, allItems: [UnifiedMediaItem], completion: @escaping ([UnifiedMediaItem]) -> Void) {
+    private func listDirectoryRecursive(path: String, allItems: [UnifiedMediaItem], completion: @escaping ([UnifiedMediaItem], Bool) -> Void) {
         // Construct URL
         let cleanHost = config.host.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
         // Ensure path starts with /
@@ -204,7 +205,7 @@ class WebDAVClient: NSObject, XMLParserDelegate {
         guard let url = URL(string: cleanHost + cleanPath) else {
             print("WebDAV listDirectory: Invalid URL - host: \(cleanHost), path: \(cleanPath)")
             DispatchQueue.main.async {
-                completion(allItems)
+                completion(allItems, false)
             }
             return
         }
@@ -218,7 +219,7 @@ class WebDAVClient: NSObject, XMLParserDelegate {
         guard let loginData = loginString.data(using: .utf8) else {
             print("WebDAV listDirectory: Failed to encode credentials")
             DispatchQueue.main.async {
-                completion(allItems)
+                completion(allItems, false)
             }
             return
         }
@@ -232,7 +233,7 @@ class WebDAVClient: NSObject, XMLParserDelegate {
                 print("WebDAV listDirectory Error Code: \((error as NSError).code)")
                 print("WebDAV listDirectory Error Domain: \((error as NSError).domain)")
                 DispatchQueue.main.async {
-                    completion(allItems)
+                    completion(allItems, false)
                 }
                 return
             }
@@ -241,7 +242,7 @@ class WebDAVClient: NSObject, XMLParserDelegate {
             guard let httpResponse = response as? HTTPURLResponse else {
                 print("WebDAV listDirectory: Invalid response type")
                 DispatchQueue.main.async {
-                    completion(allItems)
+                    completion(allItems, false)
                 }
                 return
             }
@@ -255,7 +256,7 @@ class WebDAVClient: NSObject, XMLParserDelegate {
                     print("WebDAV listDirectory: No error response body (data is nil)")
                 }
                 DispatchQueue.main.async {
-                    completion(allItems)
+                    completion(allItems, false)
                 }
                 return
             }
@@ -268,7 +269,7 @@ class WebDAVClient: NSObject, XMLParserDelegate {
                 print("WebDAV listDirectory: Data is nil or empty (Content-Length header shows \(contentLength) bytes)")
                 print("WebDAV listDirectory: This might be a URLSession configuration issue")
                 DispatchQueue.main.async {
-                    completion(allItems)
+                    completion(allItems, false)
                 }
                 return
             }
@@ -277,12 +278,12 @@ class WebDAVClient: NSObject, XMLParserDelegate {
             guard let self = self else {
                 print("WebDAV listDirectory: Self is nil (WebDAVClient was deallocated)")
                 DispatchQueue.main.async {
-                    completion(allItems)
+                    completion(allItems, false)
                 }
                 return
             }
             
-            self.parseWebDAVResponse(data) { resources in
+            self.parseWebDAVResponse(data) { resources, parseOK in
                 // Filter out the current directory itself
                 let filtered = resources.filter { res in
                     var hrefPath = res.href
@@ -352,7 +353,7 @@ class WebDAVClient: NSObject, XMLParserDelegate {
                 // If no subdirectories, we're done
                 guard !subdirectories.isEmpty else {
                     DispatchQueue.main.async {
-                        completion(collectedItems)
+                        completion(collectedItems, parseOK)
                     }
                     return
                 }
@@ -361,6 +362,8 @@ class WebDAVClient: NSObject, XMLParserDelegate {
                 let dispatchGroup = DispatchGroup()
                 var finalItems = collectedItems  // Start with items from current directory
                 let itemsLock = NSLock()
+                let successLock = NSLock()
+                var allSucceeded = parseOK
                 
                 for subdir in subdirectories {
                     dispatchGroup.enter()
@@ -384,27 +387,34 @@ class WebDAVClient: NSObject, XMLParserDelegate {
                     }
                     
                     // Pass empty array to subdirectory, it will return its own items
-                    self.listDirectoryRecursive(path: subdirPath, allItems: [], completion: { subItems in
+                    self.listDirectoryRecursive(path: subdirPath, allItems: [], completion: { subItems, didSucceed in
                         itemsLock.lock()
                         // Append items from this subdirectory to finalItems
                         finalItems.append(contentsOf: subItems)
                         itemsLock.unlock()
+                        
+                        if !didSucceed {
+                            successLock.lock()
+                            allSucceeded = false
+                            successLock.unlock()
+                        }
                         dispatchGroup.leave()
                     })
                 }
                 
                 // Wait for all subdirectories to complete
                 dispatchGroup.notify(queue: .main) {
-                    completion(finalItems)
+                    completion(finalItems, allSucceeded)
                 }
             }
         }
         task.resume()
     }
     
-    private func parseWebDAVResponse(_ data: Data, completion: @escaping ([WebDAVResource]) -> Void) {
+    private func parseWebDAVResponse(_ data: Data, completion: @escaping ([WebDAVResource], Bool) -> Void) {
         resources = []
         parseCompletion = completion
+        didCompleteParse = false
         let parser = XMLParser(data: data)
         parser.delegate = self
         let success = parser.parse()
@@ -413,9 +423,13 @@ class WebDAVClient: NSObject, XMLParserDelegate {
             if let parseError = parser.parserError {
                 print("WebDAV: Parser error: \(parseError.localizedDescription)")
             }
-            // Still call completion with empty array if parsing fails
-            DispatchQueue.main.async {
-                completion([])
+            // Completion will be called by parser error delegate in most cases.
+            // If not, fail safe here.
+            if !didCompleteParse {
+                didCompleteParse = true
+                DispatchQueue.main.async {
+                    completion([], false)
+                }
             }
         }
     }
@@ -468,17 +482,19 @@ class WebDAVClient: NSObject, XMLParserDelegate {
             resources.append(res)
         } else if elementName.hasSuffix("multistatus") {
             // Parsing complete
-            if let completion = parseCompletion {
-                completion(resources)
+            if let completion = parseCompletion, !didCompleteParse {
+                didCompleteParse = true
+                completion(resources, true)
             }
         }
     }
     
     func parser(_ parser: XMLParser, parseErrorOccurred parseError: Error) {
         print("WebDAV XML Parse Error: \(parseError.localizedDescription)")
-        if let completion = parseCompletion {
+        if let completion = parseCompletion, !didCompleteParse {
+            didCompleteParse = true
             DispatchQueue.main.async {
-                completion([])
+                completion([], false)
             }
         }
     }

@@ -49,6 +49,17 @@ class PhotoService {
             }
         }
         
+        // Handle cached local file (offline fallback)
+        if let fileURL = item.cachedFileURL {
+            DispatchQueue.global(qos: .userInitiated).async {
+                let image = UIImage(contentsOfFile: fileURL.path)
+                DispatchQueue.main.async {
+                    completion(image)
+                }
+            }
+            return nil
+        }
+        
         // Handle remote WebDAV URLs
         if let url = item.remoteURL {
             loadImageFromWebDAV(url: url, completion: completion)
@@ -114,6 +125,14 @@ class PhotoService {
             
             PHImageManager.default().requestPlayerItem(forVideo: asset, options: options) { playerItem, _ in
                 completion(playerItem)
+            }
+            return
+        }
+        
+        // Handle cached local file (offline fallback)
+        if let fileURL = item.cachedFileURL, item.type == .video {
+            DispatchQueue.main.async {
+                completion(AVPlayerItem(url: fileURL))
             }
             return
         }

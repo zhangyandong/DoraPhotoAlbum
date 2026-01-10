@@ -7,6 +7,11 @@ class SlideshowControlsView: UIView {
     
     private let stackView: UIStackView
     private var playPauseButton: UIButton?
+    private var musicButton: UIButton?
+    private var videoSoundButton: UIButton?
+    private var clockButton: UIButton?
+    private var settingsButton: UIButton?
+    private var closeButton: UIButton?
     private var autoHideTimer: Timer?
     
     private enum Constants {
@@ -52,6 +57,12 @@ class SlideshowControlsView: UIView {
         let settingsBtn = createButton(systemName: "gearshape.fill", title: "Settings", action: #selector(settingsTapped))
         let closeBtn = createButton(systemName: "xmark.circle.fill", title: "Close", action: #selector(closeTapped))
         
+        musicButton = musicBtn
+        videoSoundButton = videoSoundBtn
+        clockButton = clockBtn
+        settingsButton = settingsBtn
+        closeButton = closeBtn
+        
         stackView.addArrangedSubview(playPauseBtn)
         stackView.addArrangedSubview(musicBtn)
         stackView.addArrangedSubview(videoSoundBtn)
@@ -90,6 +101,19 @@ class SlideshowControlsView: UIView {
     }
     
     // MARK: - Public Methods
+    
+    /// When `true`, hide controls that don't make sense without media items (pure clock mode).
+    /// Hidden arranged subviews are automatically removed from UIStackView layout.
+    func setClockOnlyMode(_ enabled: Bool) {
+        playPauseButton?.isHidden = enabled
+        videoSoundButton?.isHidden = enabled
+        clockButton?.isHidden = enabled
+        
+        // Keep music/settings/close available.
+        musicButton?.isHidden = false
+        settingsButton?.isHidden = false
+        closeButton?.isHidden = false
+    }
     
     func updatePlayPauseButton(isPaused: Bool) {
         guard let button = playPauseButton else { return }

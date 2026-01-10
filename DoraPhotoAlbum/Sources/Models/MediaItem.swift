@@ -18,6 +18,9 @@ struct UnifiedMediaItem {
     // Remote/WebDAV Resource
     let remoteURL: URL?
     
+    // Cached local file (from WebDAVCache directory)
+    let cachedFileURL: URL?
+    
     // Metadata
     var locationName: String?
     
@@ -25,6 +28,7 @@ struct UnifiedMediaItem {
         self.id = asset.localIdentifier
         self.localAsset = asset
         self.remoteURL = nil
+        self.cachedFileURL = nil
         self.creationDate = asset.creationDate
         
         switch asset.mediaType {
@@ -45,6 +49,16 @@ struct UnifiedMediaItem {
         self.id = url.absoluteString
         self.localAsset = nil
         self.remoteURL = url
+        self.cachedFileURL = nil
+        self.type = type
+        self.creationDate = date
+    }
+    
+    init(cachedFileURL: URL, type: MediaType, date: Date?) {
+        self.id = cachedFileURL.path
+        self.localAsset = nil
+        self.remoteURL = nil
+        self.cachedFileURL = cachedFileURL
         self.type = type
         self.creationDate = date
     }

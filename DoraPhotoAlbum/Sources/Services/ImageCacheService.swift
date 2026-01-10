@@ -9,6 +9,9 @@ class ImageCacheService {
     private let memoryCache = NSCache<NSString, UIImage>()
     private let queue = DispatchQueue(label: "com.ipadphotoalbum.imagecache", attributes: .concurrent)
     
+    private let imageExtensions: Set<String> = ["jpg", "jpeg", "png", "heic", "heif", "gif", "webp"]
+    private let videoExtensions: Set<String> = ["mp4", "mov", "m4v", "avi", "mkv"]
+    
     // Default max cache size: 2GB
     var maxCacheSize: Int64 {
         get {
@@ -60,6 +63,13 @@ class ImageCacheService {
     
     // Check if cached file exists
     func hasCachedImage(for url: URL) -> Bool {
+        let filePath = cacheFilePath(for: url)
+        return fileManager.fileExists(atPath: filePath.path)
+    }
+
+    /// Check if any cached file (image/video/data) exists for the given URL.
+    /// Note: `hasCachedImage(for:)` is a historical name; the cache stores both images and videos.
+    func hasCachedFile(for url: URL) -> Bool {
         let filePath = cacheFilePath(for: url)
         return fileManager.fileExists(atPath: filePath.path)
     }
@@ -258,6 +268,38 @@ class ImageCacheService {
             }
         }
         return size
+    }
+    
+    /// Enumerate cached media files directly from `Caches/WebDAVCache` (offline fallback).
+    /// Note: cache filenames are derived from remote URLs; we infer media type from file extension.
+    func listCachedMediaItems(limit: Int = 2000) -> [UnifiedMediaItem] {
+        var entries: [(url: URL, date: Date)] = []
+        
+        if let enumerator = fileManager.enumerator(at: cacheDirectory, includingPropertiesForKeys: [.isRegularFileKey, .contentModificationDateKey], options: [.skipsHiddenFiles]) {
+            for case let fileURL as URL in enumerator {
+                if entries.count >= limit { break }
+                let values = try? fileURL.resourceValues(forKeys: [.isRegularFileKey, .contentModificationDateKey])
+                guard values?.isRegularFile == true else { continue }
+                let modDate = values?.contentModificationDate ?? Date.distantPast
+                entries.append((fileURL, modDate))
+            }
+        }
+        
+        // Newest first (so offline playback feels fresh)
+        entries.sort { $0.date > $1.date }
+        
+        return entries.compactMap { fileURL, modDate in
+            let ext = fileURL.pathExtension.lowercased()
+            let type: MediaType
+            if imageExtensions.contains(ext) {
+                type = .image
+            } else if videoExtensions.contains(ext) {
+                type = .video
+            } else {
+                return nil
+            }
+            return UnifiedMediaItem(cachedFileURL: fileURL, type: type, date: modDate)
+        }
     }
 }
 

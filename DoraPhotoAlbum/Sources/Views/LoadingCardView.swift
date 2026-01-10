@@ -4,7 +4,7 @@ class LoadingCardView: UIView {
     
     enum LoadingState {
         case loading
-        case completed(count: Int)
+        case completed(count: Int, message: String? = nil)
         case error(message: String)
         case disabled(message: String)
     }
@@ -115,8 +115,8 @@ class LoadingCardView: UIView {
             statusLabel.textColor = .appSecondaryLabel
             reloadButton.isHidden = true
             
-        case .completed(let count):
-            statusLabel.text = "已加载 \(count) 个项目"
+        case .completed(let count, let message):
+            statusLabel.text = message ?? "已加载 \(count) 个项目"
             statusLabel.textColor = .appAccentGreen
             reloadButton.isHidden = false
             

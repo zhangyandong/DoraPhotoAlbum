@@ -513,10 +513,31 @@ class SlideShowViewController: UIViewController {
     
     func startSlideShow() {
         guard !items.isEmpty else {
-            print("No items to show")
+            // Offline / empty playlist fallback: still allow using slideshow as a clock screen.
+            enterClockOnlyMode()
             return
         }
+        
         showNextItem()
+    }
+
+    private func enterClockOnlyMode() {
+        timer?.invalidate()
+        timer = nil
+        videoPlayerManager?.stopVideo()
+        imageDisplayManager?.cancelImageRequest()
+        imageDisplayManager?.clearAllImages()
+        imageDisplayManager?.hideImageViews(animated: false)
+        
+        isClockMode = true
+        clockOverlayView?.alpha = 1
+        clockOverlayView?.startUpdating()
+        
+        // In pure clock mode, simplify the control bar.
+        controlsView?.setClockOnlyMode(true)
+        
+        // Keep UI controls accessible
+        bringUIElementsToFront()
     }
     
     @objc private func handleTap() {

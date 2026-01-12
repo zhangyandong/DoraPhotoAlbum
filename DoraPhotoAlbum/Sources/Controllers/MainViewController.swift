@@ -9,7 +9,9 @@ class MainViewController: UIViewController {
     private var localCard: LoadingCardView!
     private var webDAVCard: LoadingCardView!
     private var cardsStack: UIStackView!
+    private var buttonsStack: UIStackView!
     private var playButton: UIButton!
+    private var clockButton: UIButton!
     private var titleLabel: UILabel!
     private var hintLabel: UILabel!
     
@@ -123,7 +125,23 @@ class MainViewController: UIViewController {
         playButton.addTarget(self, action: #selector(startSlideShow), for: .touchUpInside)
         playButton.isEnabled = false
         playButton.alpha = 0.5
-        view.addSubview(playButton)
+        
+        // Clock button
+        clockButton = UIButton(type: .system)
+        clockButton.setTitle("显示时钟", for: .normal)
+        clockButton.titleLabel?.font = UIFont.systemFont(ofSize: 28, weight: .bold)
+        clockButton.setTitleColor(.white, for: .normal)
+        clockButton.backgroundColor = UIColor.appAccentBlue // Use blue for clock
+        clockButton.layer.cornerRadius = 18
+        clockButton.translatesAutoresizingMaskIntoConstraints = false
+        clockButton.addTarget(self, action: #selector(showClockOnly), for: .touchUpInside)
+        
+        buttonsStack = UIStackView(arrangedSubviews: [playButton, clockButton])
+        buttonsStack.axis = .horizontal
+        buttonsStack.spacing = 16
+        buttonsStack.distribution = .fillEqually
+        buttonsStack.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(buttonsStack)
         
         // Settings entry (simple tap)
         let settingsButton = UIButton(type: .system)
@@ -147,12 +165,12 @@ class MainViewController: UIViewController {
             localCard.heightAnchor.constraint(equalToConstant: 120),
             webDAVCard.heightAnchor.constraint(equalToConstant: 120),
             
-            playButton.topAnchor.constraint(equalTo: cardsStack.bottomAnchor, constant: 26),
-            playButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            playButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            playButton.heightAnchor.constraint(equalToConstant: 72),
+            buttonsStack.topAnchor.constraint(equalTo: cardsStack.bottomAnchor, constant: 26),
+            buttonsStack.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            buttonsStack.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            buttonsStack.heightAnchor.constraint(equalToConstant: 72),
             
-            settingsButton.topAnchor.constraint(equalTo: playButton.bottomAnchor, constant: 14),
+            settingsButton.topAnchor.constraint(equalTo: buttonsStack.bottomAnchor, constant: 14),
             settingsButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             settingsButton.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10)
         ])
@@ -501,27 +519,25 @@ class MainViewController: UIViewController {
         
         // Update play button state
         let canPlayMedia = !allItems.isEmpty
-        let canShowClock = localDone && webDAVDone && allItems.isEmpty
         
-        playButton.isEnabled = canPlayMedia || canShowClock
-        playButton.alpha = (canPlayMedia || canShowClock) ? 1.0 : 0.5
+        playButton.isEnabled = canPlayMedia
+        playButton.alpha = canPlayMedia ? 1.0 : 0.5
         
         if canPlayMedia {
-            playButton.setTitle("开始播放", for: .normal)
             hintLabel.text = "点“开始播放”就能看照片啦"
             startPlayButtonPulseIfNeeded()
-        } else if canShowClock {
-            playButton.setTitle("显示时钟", for: .normal)
-            hintLabel.text = "没有照片也没关系，可以当时钟用"
-            startPlayButtonPulseIfNeeded()
         } else {
-            playButton.setTitle("开始播放", for: .normal)
-            hintLabel.text = "正在准备照片…"
+            // If completely empty but done loading, hint user
+            if localDone && webDAVDone {
+                hintLabel.text = "没有找到照片，可以试试显示时钟"
+            } else {
+                hintLabel.text = "正在准备照片…"
+            }
             stopPlayButtonPulse()
         }
         
-        // Auto play when both are done and we have items (or show clock when empty)
-        if localDone && webDAVDone && !hasAutoPlayed && (canPlayMedia || canShowClock) {
+        // Auto play when both are done and we have items
+        if localDone && webDAVDone && !hasAutoPlayed && canPlayMedia {
             hasAutoPlayed = true
             // Small delay to show completion state
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
@@ -529,7 +545,7 @@ class MainViewController: UIViewController {
             }
         }
     }
-
+    
     private func startPlayButtonPulseIfNeeded() {
         // Avoid stacking animations
         if playButton.layer.animation(forKey: "pulse") != nil { return }
@@ -550,6 +566,14 @@ class MainViewController: UIViewController {
     @objc private func startSlideShow() {
         let slideVC = SlideShowViewController()
         slideVC.items = allItems.shuffled()
+        slideVC.modalPresentationStyle = .fullScreen
+        present(slideVC, animated: true, completion: nil)
+    }
+    
+    @objc private func showClockOnly() {
+        let slideVC = SlideShowViewController()
+        // Empty items triggers clock-only mode in SlideShowViewController
+        slideVC.items = [] 
         slideVC.modalPresentationStyle = .fullScreen
         present(slideVC, animated: true, completion: nil)
     }

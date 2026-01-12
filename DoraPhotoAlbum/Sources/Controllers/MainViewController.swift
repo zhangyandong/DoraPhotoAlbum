@@ -14,6 +14,11 @@ class MainViewController: UIViewController {
     private var clockButton: UIButton!
     private var titleLabel: UILabel!
     private var hintLabel: UILabel!
+    private var scrollView: UIScrollView!
+    private var contentView: UIView!
+    private var contentStack: UIStackView!
+    private var localCardHeightConstraint: NSLayoutConstraint?
+    private var webDAVCardHeightConstraint: NSLayoutConstraint?
     
     // Loading state tracking
     private var localLoadingState: LoadingCardView.LoadingState = .loading
@@ -60,6 +65,16 @@ class MainViewController: UIViewController {
         NotificationCenter.default.removeObserver(self)
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        updateAdaptiveLayout()
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        updateAdaptiveLayout()
+    }
+    
     @objc private func handleMediaSourceChanged() {
         // Notifications may be posted from background threads (e.g. iCloud KVS callbacks).
         // Any UI / layout work must be on main.
@@ -73,20 +88,115 @@ class MainViewController: UIViewController {
     }
     
     private func setupUI() {
-        // Header (kid-friendly)
+        // Scrollable root (works better on small screens + Dynamic Type)
+        scrollView = UIScrollView()
+        scrollView.alwaysBounceVertical = true
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(scrollView)
+        
+        contentView = UIView()
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.addSubview(contentView)
+        
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
+        ])
+        
+        contentStack = UIStackView()
+        contentStack.axis = .vertical
+        contentStack.spacing = 16
+        contentStack.alignment = .fill
+        contentStack.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(contentStack)
+        
+        NSLayoutConstraint.activate([
+            contentStack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
+            contentStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            contentStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            contentStack.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -18)
+        ])
+        
+        // Header
         titleLabel = UILabel()
         titleLabel.text = "Dora 相册"
         titleLabel.textColor = .appLabel
-        titleLabel.font = UIFont.systemFont(ofSize: 34, weight: .bold)
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(titleLabel)
+        if #available(iOS 11.0, *) {
+            titleLabel.font = UIFont.systemFont(ofSize: 34, weight: .bold)
+        } else {
+            titleLabel.font = UIFont.boldSystemFont(ofSize: 34)
+        }
+        titleLabel.numberOfLines = 1
         
         hintLabel = UILabel()
         hintLabel.text = "点“开始播放”就能看照片啦"
         hintLabel.textColor = .appSecondaryLabel
         hintLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        hintLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(hintLabel)
+        hintLabel.numberOfLines = 0
+        
+        let headerTextStack = UIStackView(arrangedSubviews: [titleLabel, hintLabel])
+        headerTextStack.axis = .vertical
+        headerTextStack.spacing = 6
+        headerTextStack.alignment = .leading
+        
+        // Clock button (functional shortcut)
+        clockButton = UIButton(type: .system)
+        if #available(iOS 13.0, *) {
+            clockButton.setImage(UIImage(systemName: "clock.fill"), for: .normal)
+            clockButton.tintColor = .appAccentBlue
+        } else {
+            clockButton.setTitle("时钟", for: .normal)
+            clockButton.setTitleColor(.appAccentBlue, for: .normal)
+        }
+        clockButton.backgroundColor = UIColor(white: 1.0, alpha: 0.65)
+        clockButton.layer.cornerRadius = 14
+        clockButton.layer.masksToBounds = true
+        clockButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            clockButton.widthAnchor.constraint(equalToConstant: 44),
+            clockButton.heightAnchor.constraint(equalToConstant: 44)
+        ])
+        clockButton.addTarget(self, action: #selector(showClockOnly), for: .touchUpInside)
+        clockButton.accessibilityLabel = "显示时钟"
+        
+        let settingsButton = UIButton(type: .system)
+        if #available(iOS 13.0, *) {
+            settingsButton.setImage(UIImage(systemName: "gearshape.fill"), for: .normal)
+            settingsButton.tintColor = .appAccentBlue
+        } else {
+            settingsButton.setTitle("设置", for: .normal)
+            settingsButton.setTitleColor(.appAccentBlue, for: .normal)
+        }
+        settingsButton.backgroundColor = UIColor(white: 1.0, alpha: 0.65)
+        settingsButton.layer.cornerRadius = 14
+        settingsButton.layer.masksToBounds = true
+        settingsButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            settingsButton.widthAnchor.constraint(equalToConstant: 44),
+            settingsButton.heightAnchor.constraint(equalToConstant: 44)
+        ])
+        settingsButton.addTarget(self, action: #selector(openSettings), for: .touchUpInside)
+        settingsButton.accessibilityLabel = "设置"
+        
+        let trailingActions = UIStackView(arrangedSubviews: [clockButton, settingsButton])
+        trailingActions.axis = .horizontal
+        trailingActions.alignment = .center
+        trailingActions.spacing = 10
+        
+        let headerRow = UIStackView(arrangedSubviews: [headerTextStack, UIView(), trailingActions])
+        headerRow.axis = .horizontal
+        headerRow.alignment = .top
+        headerRow.spacing = 12
+        contentStack.addArrangedSubview(headerRow)
         
         // Create loading cards
         localCard = LoadingCardView()
@@ -109,71 +219,108 @@ class MainViewController: UIViewController {
         
         cardsStack = UIStackView(arrangedSubviews: [localCard, webDAVCard])
         cardsStack.axis = .vertical
-        cardsStack.spacing = 18
+        cardsStack.spacing = 14
         cardsStack.distribution = .fillEqually
-        cardsStack.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(cardsStack)
+        contentStack.addArrangedSubview(cardsStack)
+        
+        localCardHeightConstraint = localCard.heightAnchor.constraint(equalToConstant: 132)
+        webDAVCardHeightConstraint = webDAVCard.heightAnchor.constraint(equalToConstant: 132)
+        localCardHeightConstraint?.isActive = true
+        webDAVCardHeightConstraint?.isActive = true
         
         // Play button
         playButton = UIButton(type: .system)
-        playButton.setTitle("开始播放", for: .normal)
-        playButton.titleLabel?.font = UIFont.systemFont(ofSize: 28, weight: .bold)
-        playButton.setTitleColor(.white, for: .normal)
-        playButton.backgroundColor = UIColor.appAccentGreen
-        playButton.layer.cornerRadius = 18
-        playButton.translatesAutoresizingMaskIntoConstraints = false
+        configurePrimaryButton(playButton, title: "开始播放", color: .appAccentGreen, systemImageName: "play.fill")
         playButton.addTarget(self, action: #selector(startSlideShow), for: .touchUpInside)
         playButton.isEnabled = false
         playButton.alpha = 0.5
-        
-        // Clock button
-        clockButton = UIButton(type: .system)
-        clockButton.setTitle("显示时钟", for: .normal)
-        clockButton.titleLabel?.font = UIFont.systemFont(ofSize: 28, weight: .bold)
-        clockButton.setTitleColor(.white, for: .normal)
-        clockButton.backgroundColor = UIColor.appAccentBlue // Use blue for clock
-        clockButton.layer.cornerRadius = 18
-        clockButton.translatesAutoresizingMaskIntoConstraints = false
-        clockButton.addTarget(self, action: #selector(showClockOnly), for: .touchUpInside)
-        
-        buttonsStack = UIStackView(arrangedSubviews: [playButton, clockButton])
-        buttonsStack.axis = .horizontal
-        buttonsStack.spacing = 16
-        buttonsStack.distribution = .fillEqually
-        buttonsStack.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(buttonsStack)
-        
-        // Settings entry (simple tap)
-        let settingsButton = UIButton(type: .system)
-        settingsButton.setTitle("设置", for: .normal)
-        settingsButton.setTitleColor(.appAccentBlue, for: .normal)
-        settingsButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-        settingsButton.translatesAutoresizingMaskIntoConstraints = false
-        settingsButton.addTarget(self, action: #selector(openSettings), for: .touchUpInside)
-        view.addSubview(settingsButton)
+
+        // Primary action area: keep only Play as the main CTA.
+        buttonsStack = UIStackView(arrangedSubviews: [playButton])
+        buttonsStack.axis = .vertical
+        buttonsStack.spacing = 12
+        buttonsStack.distribution = .fill
+        contentStack.addArrangedSubview(buttonsStack)
         
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 18),
-            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            
-            hintLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
-            hintLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            
-            cardsStack.topAnchor.constraint(equalTo: hintLabel.bottomAnchor, constant: 22),
-            cardsStack.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            cardsStack.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            localCard.heightAnchor.constraint(equalToConstant: 120),
-            webDAVCard.heightAnchor.constraint(equalToConstant: 120),
-            
-            buttonsStack.topAnchor.constraint(equalTo: cardsStack.bottomAnchor, constant: 26),
-            buttonsStack.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            buttonsStack.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            buttonsStack.heightAnchor.constraint(equalToConstant: 72),
-            
-            settingsButton.topAnchor.constraint(equalTo: buttonsStack.bottomAnchor, constant: 14),
-            settingsButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            settingsButton.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10)
+            playButton.heightAnchor.constraint(equalToConstant: 72)
         ])
+        
+        // Bottom breathing room
+        let bottomSpacer = UIView()
+        bottomSpacer.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            bottomSpacer.heightAnchor.constraint(equalToConstant: 8)
+        ])
+        contentStack.addArrangedSubview(bottomSpacer)
+        
+        updateAdaptiveLayout()
+    }
+    
+    private func configurePrimaryButton(_ button: UIButton, title: String, color: UIColor, systemImageName: String) {
+        button.setTitle(title, for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = color
+        button.layer.cornerRadius = 18
+        button.layer.masksToBounds = false
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOpacity = 0.12
+        button.layer.shadowRadius = 14
+        button.layer.shadowOffset = CGSize(width: 0, height: 8)
+        
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 26, weight: .bold)
+        
+        if #available(iOS 13.0, *) {
+            let img = UIImage(systemName: systemImageName)
+            button.setImage(img, for: .normal)
+            button.tintColor = .white
+            // Put image before title with some spacing
+            button.semanticContentAttribute = .forceLeftToRight
+            button.imageEdgeInsets = UIEdgeInsets(top: 0, left: -6, bottom: 0, right: 6)
+        }
+        
+        button.contentEdgeInsets = UIEdgeInsets(top: 14, left: 18, bottom: 14, right: 18)
+    }
+    
+    private func configureSecondaryButton(_ button: UIButton, title: String, tint: UIColor, systemImageName: String) {
+        button.setTitle(title, for: .normal)
+        button.setTitleColor(tint, for: .normal)
+        button.backgroundColor = .appSecondarySystemGroupedBackground
+        button.layer.cornerRadius = 18
+        button.layer.masksToBounds = true
+        button.layer.borderWidth = 2
+        button.layer.borderColor = tint.withAlphaComponent(0.35).cgColor
+        
+        // Secondary buttons should feel lighter (no heavy shadow)
+        button.layer.shadowOpacity = 0
+        
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 26, weight: .bold)
+        
+        if #available(iOS 13.0, *) {
+            let img = UIImage(systemName: systemImageName)
+            button.setImage(img, for: .normal)
+            button.tintColor = tint
+            button.semanticContentAttribute = .forceLeftToRight
+            button.imageEdgeInsets = UIEdgeInsets(top: 0, left: -6, bottom: 0, right: 6)
+        }
+        
+        button.contentEdgeInsets = UIEdgeInsets(top: 14, left: 18, bottom: 14, right: 18)
+    }
+    
+    private func updateAdaptiveLayout() {
+        let width = view.bounds.width
+        let isWide = width >= 700 || traitCollection.horizontalSizeClass == .regular
+        
+        // Cards: stack horizontally on wide screens
+        cardsStack.axis = isWide ? .horizontal : .vertical
+        cardsStack.spacing = isWide ? 16 : 14
+        
+        // Buttons: side-by-side on wide screens, vertical on phones
+        buttonsStack.axis = isWide ? .horizontal : .vertical
+        buttonsStack.spacing = isWide ? 16 : 12
+        
+        localCardHeightConstraint?.constant = isWide ? 160 : 132
+        webDAVCardHeightConstraint?.constant = isWide ? 160 : 132
     }
 
     @objc private func dismissPresentedSettings() {

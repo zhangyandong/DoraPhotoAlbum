@@ -23,9 +23,9 @@ class ClockOverlayView: UIView {
         return stack
     }()
     
-    private let hourLabel = ClockOverlayView.makeDigitLabel(alignment: .center)
+    private let hourLabel = ClockOverlayView.makeDigitLabel(alignment: .right)
     private let colon1Label = ClockOverlayView.makeColonLabel()
-    private let minuteLabel = ClockOverlayView.makeDigitLabel(alignment: .center)
+    private let minuteLabel = ClockOverlayView.makeDigitLabel(alignment: .left)
     private let secondLabel = ClockOverlayView.makeDigitLabel(alignment: .center)
     private let ampmLabel = ClockOverlayView.makeSuffixLabel()
     
@@ -618,7 +618,7 @@ class ClockOverlayView: UIView {
             var lo = minSize
             var hi = maxSize
             var best = minSize
-            var bestSeconds = max(18, minSize * 0.62)
+            var bestSeconds = max(16, minSize * 0.52)
             var bestAMPM = max(16, minSize * 0.34)
             var bestDate = max(16, minSize * 0.22)
             
@@ -643,8 +643,8 @@ class ClockOverlayView: UIView {
             // Use attributed string to nudge ":" visually to center while keeping baseline alignment.
             colon1Label.attributedText = attributedColon(font: hmFont)
             // Keep seconds and AM/PM lighter (not bold/heavy)
-            secondLabel.font = makeDigitFont(size: bestSeconds, weight: .regular)
-            ampmLabel.font = makeSuffixFont(size: bestAMPM, weight: .regular)
+            secondLabel.font = makeDigitFont(size: bestSeconds, weight: .light)
+            ampmLabel.font = makeSuffixFont(size: bestAMPM, weight: .light)
             dateLabel.font = makeRoundedDateFont(size: bestDate)
             
             // Pin digit widths to avoid jitter (hour varies 1..12 or 0..23).
@@ -795,8 +795,8 @@ class ClockOverlayView: UIView {
             ampmLabel.trailingAnchor.constraint(lessThanOrEqualTo: digitalContainer.trailingAnchor)
         ])
         
-        let leading = ampmLabel.leadingAnchor.constraint(equalTo: hourLabel.leadingAnchor, constant: -10)
-        let top = ampmLabel.topAnchor.constraint(equalTo: timeRow.topAnchor, constant: -8)
+        let leading = ampmLabel.leadingAnchor.constraint(equalTo: hourLabel.leadingAnchor)
+        let top = ampmLabel.topAnchor.constraint(equalTo: timeRow.topAnchor)
         NSLayoutConstraint.activate([leading, top])
         ampmLeadingConstraint = leading
         ampmTopConstraint = top

@@ -6,6 +6,9 @@ class SlideshowControlsView: UIView {
     weak var delegate: SlideshowControlsViewDelegate?
     
     private let stackView: UIStackView
+    private let containerView = UIView()
+    private var blurView: UIVisualEffectView?
+    private let backgroundView = UIView()
     private var playPauseButton: UIButton?
     private var musicButton: UIButton?
     private var videoSoundButton: UIButton?
@@ -22,6 +25,9 @@ class SlideshowControlsView: UIView {
         static let controlsSpacing: CGFloat = 50 // Increased spacing for iPad
         static let controlsSpacingPhone: CGFloat = 30 // Increased spacing for phones
         static let buttonSymbolSize: CGFloat = 30
+        static let containerCornerRadius: CGFloat = 26
+        static let containerPaddingX: CGFloat = 14
+        static let containerPaddingY: CGFloat = 10
     }
     
     override init(frame: CGRect) {
@@ -31,15 +37,17 @@ class SlideshowControlsView: UIView {
         
         // Set spacing based on device type
         let isPad = UIDevice.current.userInterfaceIdiom == .pad
-        stackView.spacing = isPad ? Constants.controlsSpacing : Constants.controlsSpacingPhone
+        stackView.spacing = isPad ? Constants.controlsSpacingPhone : Constants.controlsSpacingPhone
+        stackView.alignment = .center
         
         super.init(frame: frame)
         
         translatesAutoresizingMaskIntoConstraints = false
         alpha = 0 // Initially hidden
+        isUserInteractionEnabled = true
         
         setupButtons()
-        addSubview(stackView)
+        setupContainer()
         setupConstraints()
     }
     
@@ -48,14 +56,14 @@ class SlideshowControlsView: UIView {
     }
     
     private func setupButtons() {
-        let playPauseBtn = createButton(systemName: "pause.fill", title: "Pause", action: #selector(playPauseTapped))
+        let playPauseBtn = createButton(systemName: "pause.fill", title: "Pause", accessibilityLabel: "播放/暂停", action: #selector(playPauseTapped))
         playPauseButton = playPauseBtn
         
-        let musicBtn = createButton(systemName: "music.note", title: "Music", action: #selector(musicTapped))
-        let videoSoundBtn = createButton(systemName: "speaker.wave.2.fill", title: "Video", action: #selector(videoSoundTapped))
-        let clockBtn = createButton(systemName: "clock.fill", title: "Clock", action: #selector(clockTapped))
-        let settingsBtn = createButton(systemName: "gearshape.fill", title: "Settings", action: #selector(settingsTapped))
-        let closeBtn = createButton(systemName: "xmark.circle.fill", title: "Close", action: #selector(closeTapped))
+        let musicBtn = createButton(systemName: "music.note", title: "Music", accessibilityLabel: "背景音乐", action: #selector(musicTapped))
+        let videoSoundBtn = createButton(systemName: "speaker.wave.2.fill", title: "Video", accessibilityLabel: "视频声音", action: #selector(videoSoundTapped))
+        let clockBtn = createButton(systemName: "clock.fill", title: "Clock", accessibilityLabel: "时钟", action: #selector(clockTapped))
+        let settingsBtn = createButton(systemName: "gearshape.fill", title: "Settings", accessibilityLabel: "设置", action: #selector(settingsTapped))
+        let closeBtn = createButton(systemName: "xmark", title: "Close", accessibilityLabel: "关闭", action: #selector(closeTapped))
         
         musicButton = musicBtn
         videoSoundButton = videoSoundBtn
@@ -71,23 +79,68 @@ class SlideshowControlsView: UIView {
         stackView.addArrangedSubview(closeBtn)
     }
     
-    private func setupConstraints() {
+    private func setupContainer() {
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        containerView.layer.cornerRadius = Constants.containerCornerRadius
+        containerView.layer.masksToBounds = true
+        
+        // Background: blur if available, otherwise translucent dark
+        if #available(iOS 13.0, *) {
+            let blur = UIBlurEffect(style: .systemThinMaterialDark)
+            let bv = UIVisualEffectView(effect: blur)
+            bv.translatesAutoresizingMaskIntoConstraints = false
+            blurView = bv
+            containerView.addSubview(bv)
+            NSLayoutConstraint.activate([
+                bv.topAnchor.constraint(equalTo: containerView.topAnchor),
+                bv.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
+                bv.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+                bv.trailingAnchor.constraint(equalTo: containerView.trailingAnchor)
+            ])
+        } else {
+            backgroundView.backgroundColor = UIColor(white: 0.0, alpha: 0.55)
+            backgroundView.translatesAutoresizingMaskIntoConstraints = false
+            containerView.addSubview(backgroundView)
+            NSLayoutConstraint.activate([
+                backgroundView.topAnchor.constraint(equalTo: containerView.topAnchor),
+                backgroundView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
+                backgroundView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+                backgroundView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor)
+            ])
+        }
+        
+        containerView.addSubview(stackView)
+        addSubview(containerView)
+        
         NSLayoutConstraint.activate([
-            stackView.topAnchor.constraint(equalTo: topAnchor),
-            stackView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stackView.trailingAnchor.constraint(equalTo: trailingAnchor)
+            stackView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: Constants.containerPaddingY),
+            stackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -Constants.containerPaddingY),
+            stackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: Constants.containerPaddingX),
+            stackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -Constants.containerPaddingX)
         ])
     }
     
-    private func createButton(systemName: String, title: String, action: Selector) -> UIButton {
+    private func setupConstraints() {
+        NSLayoutConstraint.activate([
+            containerView.topAnchor.constraint(equalTo: topAnchor),
+            containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            containerView.trailingAnchor.constraint(equalTo: trailingAnchor)
+        ])
+    }
+    
+    private func createButton(systemName: String, title: String, accessibilityLabel: String, action: Selector) -> UIButton {
         let button = UIButton(type: .system)
         button.tintColor = .white
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: action, for: .touchUpInside)
+        button.accessibilityLabel = accessibilityLabel
+        button.accessibilityTraits = .button
         
         let isPad = UIDevice.current.userInterfaceIdiom == .pad
-        let size = isPad ? Constants.buttonSymbolSize : Constants.buttonSymbolSize * 0.8
+        let size = isPad ? Constants.buttonSymbolSize : Constants.buttonSymbolSize * 0.85
+        let hitSize: CGFloat = isPad ? 56 : 50
+        let iconBgSize: CGFloat = isPad ? 44 : 42
         
         if #available(iOS 13.0, *) {
             let config = UIImage.SymbolConfiguration(pointSize: size, weight: .medium, scale: .large)
@@ -96,6 +149,19 @@ class SlideshowControlsView: UIView {
             button.setTitle(title, for: .normal)
             button.titleLabel?.font = UIFont.systemFont(ofSize: size, weight: .bold)
         }
+        
+        // Make a circular-ish icon background inside the pill for better affordance.
+        button.backgroundColor = UIColor(white: 1.0, alpha: 0.16)
+        button.layer.cornerRadius = iconBgSize / 2
+        button.layer.masksToBounds = true
+        button.contentEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        
+        NSLayoutConstraint.activate([
+            button.widthAnchor.constraint(greaterThanOrEqualToConstant: iconBgSize),
+            button.heightAnchor.constraint(greaterThanOrEqualToConstant: iconBgSize),
+            button.widthAnchor.constraint(greaterThanOrEqualToConstant: hitSize).prioritized(.defaultLow),
+            button.heightAnchor.constraint(greaterThanOrEqualToConstant: hitSize).prioritized(.defaultLow)
+        ])
         
         return button
     }
@@ -145,9 +211,32 @@ class SlideshowControlsView: UIView {
         
         UIView.animate(withDuration: Constants.fadeDuration) {
             self.alpha = targetAlpha
+            self.transform = (targetAlpha == 1.0) ? .identity : CGAffineTransform(translationX: 0, y: 8)
         } completion: { [weak self] _ in
             if targetAlpha == 1.0 {
                 self?.startAutoHideTimer()
+            }
+        }
+    }
+    
+    func showTemporarily(delay: TimeInterval? = nil) {
+        autoHideTimer?.invalidate()
+        let d = delay ?? Constants.autoHideDelay
+        if alpha == 0 {
+            transform = CGAffineTransform(translationX: 0, y: 8)
+        }
+        UIView.animate(withDuration: Constants.fadeDuration) {
+            self.alpha = 1.0
+            self.transform = .identity
+        } completion: { [weak self] _ in
+            self?.autoHideTimer = Timer.scheduledTimer(withTimeInterval: d, repeats: false) { [weak self] _ in
+                guard let self = self else { return }
+                if self.alpha == 1 {
+                    UIView.animate(withDuration: Constants.fadeDuration) {
+                        self.alpha = 0
+                        self.transform = CGAffineTransform(translationX: 0, y: 8)
+                    }
+                }
             }
         }
     }
@@ -158,6 +247,7 @@ class SlideshowControlsView: UIView {
             if self.alpha == 1 {
                 UIView.animate(withDuration: Constants.fadeDuration) {
                     self.alpha = 0
+                    self.transform = CGAffineTransform(translationX: 0, y: 8)
                 }
             }
         }

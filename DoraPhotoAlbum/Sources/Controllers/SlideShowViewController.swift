@@ -24,6 +24,8 @@ class SlideShowViewController: UIViewController {
         static let dashboardWidth: CGFloat = 200
         static let buttonSymbolSize: CGFloat = 30
         static let heartSize: CGFloat = 100
+        static let controlsHorizontalInset: CGFloat = 16
+        static let controlsBottomSafeInset: CGFloat = 18
     }
     
     // MARK: - Public Properties
@@ -181,8 +183,10 @@ class SlideShowViewController: UIViewController {
         self.controlsView = controls
         
         NSLayoutConstraint.activate([
-            controls.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -Constants.controlsBottomInset),
-            controls.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -Constants.controlsTrailingInset)
+            controls.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            controls.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -Constants.controlsBottomSafeInset),
+            controls.leadingAnchor.constraint(greaterThanOrEqualTo: view.safeAreaLayoutGuide.leadingAnchor, constant: Constants.controlsHorizontalInset),
+            controls.trailingAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -Constants.controlsHorizontalInset)
         ])
     }
 
@@ -470,6 +474,9 @@ class SlideShowViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        
+        // Show controls briefly so users immediately discover how to interact.
+        controlsView?.showTemporarily(delay: 6.0)
         startSlideShow()
     }
     

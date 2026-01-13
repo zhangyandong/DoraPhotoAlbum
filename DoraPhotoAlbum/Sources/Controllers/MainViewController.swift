@@ -392,8 +392,8 @@ class MainViewController: UIViewController {
         let webDAVEnabled = webDAVSettings.bool(forKey: AppConstants.Keys.kWebDAVEnabled)
         if webDAVEnabled,
            let host = webDAVSettings.string(forKey: AppConstants.Keys.kWebDAVHost), !host.isEmpty,
-           let user = webDAVSettings.string(forKey: AppConstants.Keys.kWebDAVUser),
-           let pass = webDAVSettings.string(forKey: AppConstants.Keys.kWebDAVPassword) {
+           let _ = webDAVSettings.string(forKey: AppConstants.Keys.kWebDAVUser),
+           let _ = webDAVSettings.string(forKey: AppConstants.Keys.kWebDAVPassword) {
             webDAVCard.state = .loading
             webDAVLoadingState = .loading
             loadWebDAVMedia()

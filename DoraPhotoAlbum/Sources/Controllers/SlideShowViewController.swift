@@ -8,7 +8,7 @@ class SlideShowViewController: UIViewController {
     // MARK: - Constants
     
     private enum Constants {
-        static let transitionDuration: TimeInterval = 1.0
+        static let transitionDuration: TimeInterval = 0.3
         static let fadeDuration: TimeInterval = 0.3
         static let videoHideDuration: TimeInterval = 0.5
         static let controlsAutoHideDelay: TimeInterval = 10.0

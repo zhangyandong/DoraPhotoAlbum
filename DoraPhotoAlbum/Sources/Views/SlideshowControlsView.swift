@@ -146,7 +146,30 @@ class SlideshowControlsView: UIView {
             let config = UIImage.SymbolConfiguration(pointSize: size, weight: .medium, scale: .large)
             button.setImage(UIImage(systemName: systemName, withConfiguration: config), for: .normal)
         } else {
-            button.setTitle(title, for: .normal)
+            // iOS 12: use emoji-only controls for consistent look (no SF Symbols).
+            let emoji: String
+            switch systemName {
+            case "pause.fill":
+                emoji = "⏸"
+            case "play.fill":
+                emoji = "▶️"
+            case "music.note":
+                emoji = "🎵"
+            case "speaker.wave.2.fill":
+                emoji = "🔊"
+            case "clock.fill":
+                emoji = "🕒"
+            case "gearshape.fill", "gearshape":
+                emoji = "⚙️"
+            case "xmark", "xmark.circle.fill":
+                emoji = "✖️"
+            default:
+                emoji = title
+            }
+            
+            button.setImage(nil, for: .normal)
+            button.setTitle(emoji, for: .normal)
+            button.setTitleColor(.white, for: .normal)
             button.titleLabel?.font = UIFont.systemFont(ofSize: size, weight: .bold)
         }
         
@@ -192,14 +215,18 @@ class SlideshowControlsView: UIView {
                 let config = UIImage.SymbolConfiguration(pointSize: size, weight: .medium, scale: .large)
                 button.setImage(UIImage(systemName: "play.fill", withConfiguration: config), for: .normal)
             } else {
-                button.setTitle("Play", for: .normal)
+                button.setImage(nil, for: .normal)
+                button.setTitle("▶️", for: .normal)
+                button.setTitleColor(.white, for: .normal)
             }
         } else {
             if #available(iOS 13.0, *) {
                 let config = UIImage.SymbolConfiguration(pointSize: size, weight: .medium, scale: .large)
                 button.setImage(UIImage(systemName: "pause.fill", withConfiguration: config), for: .normal)
             } else {
-                button.setTitle("Pause", for: .normal)
+                button.setImage(nil, for: .normal)
+                button.setTitle("⏸", for: .normal)
+                button.setTitleColor(.white, for: .normal)
             }
         }
     }

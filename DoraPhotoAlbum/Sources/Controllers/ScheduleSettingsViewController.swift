@@ -2,296 +2,155 @@ import UIKit
 
 class ScheduleSettingsViewController: UIViewController {
     
-    private let scrollView = UIScrollView()
-    private let stack = UIStackView()
-    
-    private let sleepEnabledSwitch = UISwitch()
-    private let wakeEnabledSwitch = UISwitch()
-    private let sleepPicker = UIDatePicker()
-    private let wakePicker = UIDatePicker()
-    private let sleepWeekdaySelector = WeekdaySelectorView()
-    private let wakeWeekdaySelector = WeekdaySelectorView()
+    private var tableView: UITableView!
+    private var plans: [SchedulePlan] = []
     
     var onSave: (() -> Void)?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .appSystemGroupedBackground
         title = "定时计划"
         setupNavigation()
-        setupLayout()
-        loadData()
+        setupTableView()
+        loadPlans()
+    }
+    
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+        tableView.setEditing(editing, animated: animated)
     }
     
     private func setupNavigation() {
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "保存", style: .done, target: self, action: #selector(save))
+        navigationItem.rightBarButtonItems = [UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addPlan)), editButtonItem]
     }
     
-    private func setupLayout() {
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(scrollView)
+    private func setupTableView() {
+        // iOS 12 compatibility: `.insetGrouped` is only available on iOS 13+.
+        if #available(iOS 13.0, *) {
+            tableView = UITableView(frame: .zero, style: .insetGrouped)
+        } else {
+            tableView = UITableView(frame: .zero, style: .grouped)
+        }
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.rowHeight = 72
+        tableView.allowsSelectionDuringEditing = true
+        view.addSubview(tableView)
         
         NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-        
-        stack.axis = .vertical
-        stack.spacing = 16
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.addSubview(stack)
-        
-        NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 20),
-            stack.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 20),
-            stack.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -20),
-            stack.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -20),
-            stack.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -40)
-        ])
-        
-        // Sleep time section
-        let sleepSwitchRow = createSwitchRow(label: "启用休眠时间", switch: sleepEnabledSwitch)
-        stack.addArrangedSubview(sleepSwitchRow)
-        
-        stack.addArrangedSubview(createLabel("生效日期"))
-        sleepWeekdaySelector.translatesAutoresizingMaskIntoConstraints = false
-        stack.addArrangedSubview(sleepWeekdaySelector)
-        
-        stack.addArrangedSubview(createLabel("休眠时间 (黑屏)"))
-        sleepPicker.datePickerMode = .time
-        stack.addArrangedSubview(sleepPicker)
-        
-        // Add spacing
-        stack.addArrangedSubview(createSpacer(height: 8))
-        
-        // Wake time section
-        let wakeSwitchRow = createSwitchRow(label: "启用唤醒时间", switch: wakeEnabledSwitch)
-        stack.addArrangedSubview(wakeSwitchRow)
-        
-        stack.addArrangedSubview(createLabel("生效日期"))
-        wakeWeekdaySelector.translatesAutoresizingMaskIntoConstraints = false
-        stack.addArrangedSubview(wakeWeekdaySelector)
-        
-        stack.addArrangedSubview(createLabel("唤醒时间"))
-        wakePicker.datePickerMode = .time
-        stack.addArrangedSubview(wakePicker)
-    }
-    
-    private func createLabel(_ text: String) -> UILabel {
-        let l = UILabel()
-        l.text = text
-        l.font = UIFont.boldSystemFont(ofSize: 14)
-        l.textColor = .darkGray
-        return l
-    }
-    
-    private func createSwitchRow(label: String, switch: UISwitch) -> UIStackView {
-        let row = UIStackView()
-        row.axis = .horizontal
-        row.alignment = .center
-        row.spacing = 12
-        
-        let labelView = UILabel()
-        labelView.text = label
-        labelView.font = UIFont.systemFont(ofSize: 14, weight: .medium)
-        labelView.textColor = .darkGray
-        
-        row.addArrangedSubview(labelView)
-        row.addArrangedSubview(`switch`)
-        return row
-    }
-    
-    private func createSpacer(height: CGFloat) -> UIView {
-        let spacer = UIView()
-        spacer.translatesAutoresizingMaskIntoConstraints = false
-        spacer.heightAnchor.constraint(equalToConstant: height).isActive = true
-        return spacer
     }
     
     // MARK: - Actions
-    @objc private func sleepSwitchChanged() {
-        sleepPicker.isEnabled = sleepEnabledSwitch.isOn
+    @objc private func addPlan() {
+        let new = SchedulePlan.default(title: "计划 \(plans.count + 1)")
+        openEditor(for: new, isNew: true)
     }
     
-    @objc private func wakeSwitchChanged() {
-        wakePicker.isEnabled = wakeEnabledSwitch.isOn
+    // MARK: - Data
+    private func loadPlans() {
+        plans = SchedulePlanStore.load()
+        tableView.reloadData()
+        updateEmptyState()
     }
-    @objc private func save() {
-        let defaults = UserDefaults.standard
-        defaults.set(sleepEnabledSwitch.isOn, forKey: AppConstants.Keys.kSleepEnabled)
-        defaults.set(wakeEnabledSwitch.isOn, forKey: AppConstants.Keys.kWakeEnabled)
-        defaults.set(sleepPicker.date, forKey: AppConstants.Keys.kSleepTime)
-        defaults.set(wakePicker.date, forKey: AppConstants.Keys.kWakeTime)
+    
+    private func persistPlans() {
+        SchedulePlanStore.save(plans)
         
-        // Save selected weekdays as array
-        defaults.set(Array(sleepWeekdaySelector.selectedWeekdays), forKey: AppConstants.Keys.kSleepWeekdays)
-        defaults.set(Array(wakeWeekdaySelector.selectedWeekdays), forKey: AppConstants.Keys.kWakeWeekdays)
-        
-        defaults.synchronize()
-        
-        // Restart monitoring if either sleep or wake is enabled
-        if sleepEnabledSwitch.isOn || wakeEnabledSwitch.isOn {
+        if plans.contains(where: { $0.sleepEnabled || $0.wakeEnabled }) {
             SchedulerService.shared.startMonitoring()
         } else {
             SchedulerService.shared.stopMonitoring()
         }
         
         onSave?()
-        navigationController?.popViewController(animated: true)
+        updateEmptyState()
     }
     
-    // MARK: - Data
-    private func loadData() {
-        let defaults = UserDefaults.standard
-        
-        // Load sleep enabled state
-        let sleepEnabled: Bool
-        if defaults.object(forKey: AppConstants.Keys.kSleepEnabled) != nil {
-            sleepEnabled = defaults.bool(forKey: AppConstants.Keys.kSleepEnabled)
+    private func updateEmptyState() {
+        if plans.isEmpty {
+            let label = UILabel()
+            label.textAlignment = .center
+            label.numberOfLines = 0
+            label.textColor = .appSecondaryLabel
+            label.font = UIFont.systemFont(ofSize: 15, weight: .medium)
+            label.text = "还没有计划\n点右上角“＋”添加一条休眠/唤醒计划"
+            label.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: 120)
+            tableView.tableHeaderView = label
         } else {
-            sleepEnabled = AppConstants.Defaults.sleepEnabled
+            tableView.tableHeaderView = nil
         }
-        sleepEnabledSwitch.isOn = sleepEnabled
-        
-        // Load wake enabled state
-        let wakeEnabled: Bool
-        if defaults.object(forKey: AppConstants.Keys.kWakeEnabled) != nil {
-            wakeEnabled = defaults.bool(forKey: AppConstants.Keys.kWakeEnabled)
-        } else {
-            wakeEnabled = AppConstants.Defaults.wakeEnabled
+    }
+    
+    private func openEditor(for plan: SchedulePlan, isNew: Bool) {
+        let editor = SchedulePlanEditorViewController(plan: plan)
+        editor.onSave = { [weak self] updated in
+            guard let self = self else { return }
+            if let idx = self.plans.firstIndex(where: { $0.id == updated.id }) {
+                self.plans[idx] = updated
+            } else {
+                self.plans.append(updated)
+            }
+            self.tableView.reloadData()
+            self.persistPlans()
         }
-        wakeEnabledSwitch.isOn = wakeEnabled
+        navigationController?.pushViewController(editor, animated: true)
+    }
+}
+
+// MARK: - UITableView
+
+extension ScheduleSettingsViewController: UITableViewDataSource, UITableViewDelegate {
+    func numberOfSections(in tableView: UITableView) -> Int { 1 }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        plans.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let plan = plans[indexPath.row]
+        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: nil)
+        cell.accessoryType = .disclosureIndicator
         
-        // Load sleep and wake times
-        if let sDate = defaults.object(forKey: AppConstants.Keys.kSleepTime) as? Date {
-            sleepPicker.date = sDate
-        } else {
-            // Use default sleep time (22:00)
-            sleepPicker.date = AppConstants.Defaults.defaultSleepTime
-        }
-        if let wDate = defaults.object(forKey: AppConstants.Keys.kWakeTime) as? Date {
-            wakePicker.date = wDate
-        } else {
-            // Use default wake time (07:00)
-            wakePicker.date = AppConstants.Defaults.defaultWakeTime
-        }
+        cell.textLabel?.text = plan.title
+        cell.textLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         
-        // Load selected weekdays
-        if let sleepWeekdays = defaults.array(forKey: AppConstants.Keys.kSleepWeekdays) as? [Int] {
-            sleepWeekdaySelector.selectedWeekdays = Set(sleepWeekdays)
-        } else {
-            // Default: all weekdays selected
-            sleepWeekdaySelector.selectedWeekdays = Set(1...7)
-        }
+        let sleepPart: String = {
+            guard plan.sleepEnabled else { return "休眠：关闭" }
+            return "休眠：\(SchedulePlanStore.timeString(fromMinutes: plan.sleepMinutes))（\(SchedulePlanStore.weekdaysShortString(plan.sleepWeekdays))）"
+        }()
+        let wakePart: String = {
+            guard plan.wakeEnabled else { return "唤醒：关闭" }
+            return "唤醒：\(SchedulePlanStore.timeString(fromMinutes: plan.wakeMinutes))（\(SchedulePlanStore.weekdaysShortString(plan.wakeWeekdays))）"
+        }()
         
-        if let wakeWeekdays = defaults.array(forKey: AppConstants.Keys.kWakeWeekdays) as? [Int] {
-            wakeWeekdaySelector.selectedWeekdays = Set(wakeWeekdays)
-        } else {
-            // Default: all weekdays selected
-            wakeWeekdaySelector.selectedWeekdays = Set(1...7)
+        cell.detailTextLabel?.numberOfLines = 2
+        cell.detailTextLabel?.textColor = .appSecondaryLabel
+        cell.detailTextLabel?.text = "\(sleepPart)\n\(wakePart)"
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        let plan = plans[indexPath.row]
+        openEditor(for: plan, isNew: false)
+    }
+    
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool { true }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            plans.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .automatic)
+            persistPlans()
         }
     }
 }
 
-// MARK: - Weekday Selector View
-class WeekdaySelectorView: UIView {
-    var selectedWeekdays: Set<Int> = Set(1...7) {
-        didSet {
-            updateButtons()
-        }
-    }
-    
-    private let weekdayLabels = ["一", "二", "三", "四", "五", "六", "日"]
-    private var buttons: [UIButton] = []
-    private let stackView = UIStackView()
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupUI()
-    }
-    
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupUI()
-    }
-    
-    private func setupUI() {
-        stackView.axis = .horizontal
-        stackView.distribution = .fillEqually
-        stackView.spacing = 8
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(stackView)
-        
-        NSLayoutConstraint.activate([
-            stackView.topAnchor.constraint(equalTo: topAnchor),
-            stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            stackView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            heightAnchor.constraint(equalToConstant: 44)
-        ])
-        
-        for (index, label) in weekdayLabels.enumerated() {
-            let button = createWeekdayButton(title: label, weekday: index + 1)
-            buttons.append(button)
-            stackView.addArrangedSubview(button)
-        }
-        
-        updateButtons()
-    }
-    
-    private func createWeekdayButton(title: String, weekday: Int) -> UIButton {
-        let button = UIButton(type: .custom)
-        button.setTitle(title, for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 15, weight: .medium)
-        button.layer.cornerRadius = 8
-        button.layer.borderWidth = 1.5
-        button.addTarget(self, action: #selector(weekdayButtonTapped(_:)), for: .touchUpInside)
-        button.tag = weekday
-        return button
-    }
-    
-    @objc private func weekdayButtonTapped(_ sender: UIButton) {
-        let weekday = sender.tag
-        if selectedWeekdays.contains(weekday) {
-            selectedWeekdays.remove(weekday)
-        } else {
-            selectedWeekdays.insert(weekday)
-        }
-        updateButtons()
-    }
-    
-    private func updateButtons() {
-        for button in buttons {
-            let weekday = button.tag
-            let isSelected = selectedWeekdays.contains(weekday)
-            
-            if isSelected {
-                button.backgroundColor = .appAccentBlue
-                button.setTitleColor(.white, for: .normal)
-                button.layer.borderColor = UIColor.appAccentBlue.cgColor
-            } else {
-                // Use lighter background color for unselected buttons
-                if #available(iOS 13.0, *) {
-                    button.backgroundColor = UIColor.appSystemBackground
-                } else {
-                    button.backgroundColor = .white
-                }
-                // Use compatible text color for all iOS versions
-                if #available(iOS 13.0, *) {
-                    button.setTitleColor(.appLabel, for: .normal)
-                } else {
-                    button.setTitleColor(.darkText, for: .normal)
-                }
-                // Use lighter border color for unselected buttons
-                if #available(iOS 13.0, *) {
-                    button.layer.borderColor = UIColor.separator.cgColor
-                } else {
-                    button.layer.borderColor = UIColor(white: 0.88, alpha: 1.0).cgColor
-                }
-            }
-        }
-    }
-}
 

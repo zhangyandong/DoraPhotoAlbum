@@ -11,6 +11,12 @@ class SchedulerService {
     private init() {}
     
     func startMonitoring() {
+        // If there is no active schedule, don't run a timer.
+        guard hasActiveSchedule() else {
+            stopMonitoring()
+            return
+        }
+        
         // Invalidate existing timer to prevent stacking
         timer?.invalidate()
         
@@ -35,29 +41,12 @@ class SchedulerService {
     }
     
     private func checkTime() {
-        let defaults = UserDefaults.standard
+        // Load multi-plan schedules first. If none exist, fall back to legacy behavior via migration.
+        let plans = SchedulePlanStore.load()
         
-        // Check if sleep is enabled
-        let sleepEnabled: Bool
-        if defaults.object(forKey: AppConstants.Keys.kSleepEnabled) != nil {
-            sleepEnabled = defaults.bool(forKey: AppConstants.Keys.kSleepEnabled)
-        } else {
-            sleepEnabled = AppConstants.Defaults.sleepEnabled
-        }
-        
-        // Check if wake is enabled
-        let wakeEnabled: Bool
-        if defaults.object(forKey: AppConstants.Keys.kWakeEnabled) != nil {
-            wakeEnabled = defaults.bool(forKey: AppConstants.Keys.kWakeEnabled)
-        } else {
-            wakeEnabled = AppConstants.Defaults.wakeEnabled
-        }
-        
-        // If both are disabled, exit sleep mode if currently sleeping
-        guard sleepEnabled || wakeEnabled else {
-            if isSleeping {
-                exitSleepMode()
-            }
+        // If there is no active plan, exit sleep mode if currently sleeping.
+        if !plans.contains(where: { $0.sleepEnabled || $0.wakeEnabled }) {
+            if isSleeping { exitSleepMode() }
             return
         }
         
@@ -73,84 +62,9 @@ class SchedulerService {
             currentWeekday = 7 // Sunday
         }
         
-        // Get selected weekdays for sleep and wake
-        let sleepWeekdays: Set<Int>
-        if sleepEnabled, let weekdaysArray = defaults.array(forKey: AppConstants.Keys.kSleepWeekdays) as? [Int] {
-            sleepWeekdays = Set(weekdaysArray)
-        } else if sleepEnabled {
-            sleepWeekdays = Set(1...7) // Default: all weekdays
-        } else {
-            sleepWeekdays = Set<Int>()
-        }
-        
-        let wakeWeekdays: Set<Int>
-        if wakeEnabled, let weekdaysArray = defaults.array(forKey: AppConstants.Keys.kWakeWeekdays) as? [Int] {
-            wakeWeekdays = Set(weekdaysArray)
-        } else if wakeEnabled {
-            wakeWeekdays = Set(1...7) // Default: all weekdays
-        } else {
-            wakeWeekdays = Set<Int>()
-        }
-        
-        // Check if current weekday is applicable
-        let isSleepWeekday = sleepWeekdays.contains(currentWeekday)
-        let isWakeWeekday = wakeWeekdays.contains(currentWeekday)
-        
-        // If current weekday is not in any selected weekdays, exit sleep mode
-        guard isSleepWeekday || isWakeWeekday else {
-            if isSleeping {
-                exitSleepMode()
-            }
-            return
-        }
-        
-        var shouldSleep = false
-        
-        // Get sleep and wake times (use defaults if not set)
-        var sleepMins: Int?
-        if sleepEnabled, isSleepWeekday {
-            let sleepDate: Date
-            if let savedDate = defaults.object(forKey: AppConstants.Keys.kSleepTime) as? Date {
-                sleepDate = savedDate
-            } else {
-                sleepDate = AppConstants.Defaults.defaultSleepTime
-            }
-            let sleepComponents = calendar.dateComponents([.hour, .minute], from: sleepDate)
-            sleepMins = (sleepComponents.hour ?? 0) * 60 + (sleepComponents.minute ?? 0)
-        }
-        
-        var wakeMins: Int?
-        if wakeEnabled, isWakeWeekday {
-            let wakeDate: Date
-            if let savedDate = defaults.object(forKey: AppConstants.Keys.kWakeTime) as? Date {
-                wakeDate = savedDate
-            } else {
-                wakeDate = AppConstants.Defaults.defaultWakeTime
-            }
-            let wakeComponents = calendar.dateComponents([.hour, .minute], from: wakeDate)
-            wakeMins = (wakeComponents.hour ?? 0) * 60 + (wakeComponents.minute ?? 0)
-        }
-        
-        // Determine if should sleep based on time
-        if let sleep = sleepMins, let wake = wakeMins {
-            // Both enabled: check if current time is in sleep period
-            if sleep > wake {
-                // Crosses midnight (e.g. 22:00 to 07:00)
-                // Sleep from sleep time to midnight, then from midnight to wake time
-                shouldSleep = (currentMins >= sleep || currentMins < wake)
-            } else {
-                // Same day (e.g. 13:00 to 14:00)
-                // Sleep between sleep time and wake time
-                shouldSleep = (currentMins >= sleep && currentMins < wake)
-            }
-        } else if let sleep = sleepMins {
-            // Only sleep enabled: sleep from sleep time until end of day
-            // Then check again next day if weekday matches
-            shouldSleep = (currentMins >= sleep)
-        } else if let wake = wakeMins {
-            // Only wake enabled: sleep from midnight until wake time
-            // After wake time, don't sleep (until next day if weekday matches)
-            shouldSleep = (currentMins < wake)
+        // Determine if ANY plan requires sleeping right now.
+        let shouldSleep = plans.contains { plan in
+            return self.planShouldSleepNow(plan, currentMins: currentMins, currentWeekday: currentWeekday)
         }
         
         if shouldSleep {
@@ -162,6 +76,60 @@ class SchedulerService {
                 exitSleepMode()
             }
         }
+    }
+    
+    private func planShouldSleepNow(_ plan: SchedulePlan, currentMins: Int, currentWeekday: Int) -> Bool {
+        let sleepWeekdays = Set(plan.sleepWeekdays)
+        let wakeWeekdays = Set(plan.wakeWeekdays)
+        
+        let isSleepWeekday = plan.sleepEnabled && sleepWeekdays.contains(currentWeekday)
+        let isWakeWeekday = plan.wakeEnabled && wakeWeekdays.contains(currentWeekday)
+        
+        // If neither sleep nor wake applies today for this plan, it doesn't affect current state.
+        guard isSleepWeekday || isWakeWeekday else { return false }
+        
+        let sleepMins: Int? = isSleepWeekday ? plan.sleepMinutes : nil
+        let wakeMins: Int? = isWakeWeekday ? plan.wakeMinutes : nil
+        
+        if let sleep = sleepMins, let wake = wakeMins {
+            if sleep > wake {
+                // Crosses midnight (e.g. 22:00 to 07:00)
+                return (currentMins >= sleep || currentMins < wake)
+            } else {
+                // Same day window (e.g. 13:00 to 14:00)
+                return (currentMins >= sleep && currentMins < wake)
+            }
+        } else if let sleep = sleepMins {
+            // Only sleep enabled: sleep from sleep time until end of day
+            return currentMins >= sleep
+        } else if let wake = wakeMins {
+            // Only wake enabled: sleep from midnight until wake time
+            return currentMins < wake
+        }
+        return false
+    }
+    
+    private func hasActiveSchedule() -> Bool {
+        let plans = SchedulePlanStore.load()
+        if plans.contains(where: { $0.sleepEnabled || $0.wakeEnabled }) {
+            return true
+        }
+        
+        // Legacy fallback
+        let defaults = UserDefaults.standard
+        let sleepEnabled: Bool
+        if defaults.object(forKey: AppConstants.Keys.kSleepEnabled) != nil {
+            sleepEnabled = defaults.bool(forKey: AppConstants.Keys.kSleepEnabled)
+        } else {
+            sleepEnabled = AppConstants.Defaults.sleepEnabled
+        }
+        let wakeEnabled: Bool
+        if defaults.object(forKey: AppConstants.Keys.kWakeEnabled) != nil {
+            wakeEnabled = defaults.bool(forKey: AppConstants.Keys.kWakeEnabled)
+        } else {
+            wakeEnabled = AppConstants.Defaults.wakeEnabled
+        }
+        return sleepEnabled || wakeEnabled
     }
     
     private func enterSleepMode() {

@@ -18,6 +18,9 @@ struct AppConstants {
         static let kWakeTime = "kWakeTime"
         static let kSleepWeekdays = "kSleepWeekdays" // Set of Int (1=Monday, 7=Sunday)
         static let kWakeWeekdays = "kWakeWeekdays" // Set of Int (1=Monday, 7=Sunday)
+        
+        // Schedule Plans (v2): [SchedulePlan] encoded as JSON Data
+        static let kSchedulePlans = "kSchedulePlans"
         static let kSelectedPlaylist = "kSelectedPlaylist" // Name of the playlist, empty for All Songs
         static let kMusicPlaybackMode = "kMusicPlaybackMode" // 0: Sequential, 1: Shuffle, 2: Single Loop
         static let kVideoMuted = "kVideoMuted"

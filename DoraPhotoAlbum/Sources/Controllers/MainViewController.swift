@@ -718,11 +718,9 @@ class MainViewController: UIViewController {
     }
     
     @objc private func showClockOnly() {
-        let slideVC = SlideShowViewController()
-        // Empty items triggers clock-only mode in SlideShowViewController
-        slideVC.items = [] 
-        slideVC.modalPresentationStyle = .fullScreen
-        present(slideVC, animated: true, completion: nil)
+        let vc = ClockOnlyViewController()
+        vc.modalPresentationStyle = .fullScreen
+        present(vc, animated: true)
     }
     
     @objc private func openSettings() {

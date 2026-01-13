@@ -40,6 +40,13 @@ extension SlideShowViewController {
         }
         contentMode = (contentModeIndex == 1) ? .scaleAspectFit : .scaleAspectFill
         
+        // Dashboard visibility: use default if not set
+        if defaults.object(forKey: AppConstants.Keys.kShowDashboard) != nil {
+            showDashboard = defaults.bool(forKey: AppConstants.Keys.kShowDashboard)
+        } else {
+            showDashboard = AppConstants.Defaults.showDashboard
+        }
+        
         // Clock mode: use default if not set
         if defaults.object(forKey: AppConstants.Keys.kStartInClockMode) != nil {
             isClockMode = defaults.bool(forKey: AppConstants.Keys.kStartInClockMode)
@@ -49,6 +56,7 @@ extension SlideShowViewController {
     }
     
     func reloadSettings() {
+        let prevShowDashboard = showDashboard
         loadSettings()
         
         // Update current player if playing
@@ -74,6 +82,17 @@ extension SlideShowViewController {
         
         // Apply content mode to image display manager
         imageDisplayManager?.updateContentMode(contentMode)
+        
+        // Apply dashboard visibility without restarting slideshow
+        if showDashboard != prevShowDashboard {
+            if showDashboard {
+                setupDashboardIfNeeded()
+            } else {
+                dashboardView?.removeFromSuperview()
+                dashboardView = nil
+            }
+            bringUIElementsToFront()
+        }
     }
 }
 

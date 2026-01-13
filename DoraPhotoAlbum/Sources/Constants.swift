@@ -24,6 +24,9 @@ struct AppConstants {
         static let kSelectedPlaylist = "kSelectedPlaylist" // Name of the playlist, empty for All Songs
         static let kMusicPlaybackMode = "kMusicPlaybackMode" // 0: Sequential, 1: Shuffle, 2: Single Loop
         static let kVideoMuted = "kVideoMuted"
+        
+        // Playback UI
+        static let kShowDashboard = "kShowDashboard"
         static let kCacheMaxSize = "kCacheMaxSize" // Maximum cache size in bytes (default: 2GB)
         static let kLocalAlbumEnabled = "kLocalAlbumEnabled"
         static let kWebDAVEnabled = "kWebDAVEnabled"
@@ -44,6 +47,7 @@ struct AppConstants {
         static let videoMaxDuration: Double = 0.0 // 视频最大播放时长（秒，0表示不限制）
         static let contentMode: Int = 1 // 图片显示模式：0=填充(裁剪), 1=适应(完整)
         static let videoMuted: Bool = false // 视频静音：false=不静音
+        static let showDashboard: Bool = true // 是否显示 Dashboard 信息面板
         
         // Music Settings
         static let playBackgroundMusic: Bool = false // 播放背景音乐：false=关闭

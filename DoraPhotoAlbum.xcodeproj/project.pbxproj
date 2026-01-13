@@ -47,6 +47,8 @@
 		F5D85F712EF6494D00983F1B /* LoadingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F702EF6494D00983F1B /* LoadingCardView.swift */; };
 		F5D85F732EF702FC00983F1B /* SlideshowControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F722EF702FC00983F1B /* SlideshowControlsView.swift */; };
 		F6A0A0042F0B000100000001 /* LegacyIconFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A0A0142F0B000100000001 /* LegacyIconFactory.swift */; };
+		F6A0A0052F0B000200000001 /* PhotoMiniClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A0A0152F0B000200000001 /* PhotoMiniClockView.swift */; };
+		F6A0A0062F0B000300000001 /* ClockOnlyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A0A0162F0B000300000001 /* ClockOnlyViewController.swift */; };
 		F5D85F772EF7032F00983F1B /* KenBurnsAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F752EF7032F00983F1B /* KenBurnsAnimator.swift */; };
 		F5D85F782EF7032F00983F1B /* ImageDisplayManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F742EF7032F00983F1B /* ImageDisplayManager.swift */; };
 		F5D85F792EF7032F00983F1B /* VideoPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D85F762EF7032F00983F1B /* VideoPlayerManager.swift */; };
@@ -105,6 +107,7 @@
 		F6A0A0112F0B000100000001 /* SchedulePlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchedulePlan.swift; sourceTree = "<group>"; };
 		F6A0A0122F0B000100000001 /* WeekdaySelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekdaySelectorView.swift; sourceTree = "<group>"; };
 		F6A0A0132F0B000100000001 /* SchedulePlanEditorViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchedulePlanEditorViewController.swift; sourceTree = "<group>"; };
+		F6A0A0162F0B000300000001 /* ClockOnlyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClockOnlyViewController.swift; sourceTree = "<group>"; };
 		F55144422EF51A25001835A0 /* WebDAVSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVSettingsViewController.swift; sourceTree = "<group>"; };
 		F55144472EF51DB9001835A0 /* MusicSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicSettingsViewController.swift; sourceTree = "<group>"; };
 		F55144492EF5200B001835A0 /* LocalAlbumSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalAlbumSettingsViewController.swift; sourceTree = "<group>"; };
@@ -117,6 +120,7 @@
 		F5D85F702EF6494D00983F1B /* LoadingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingCardView.swift; sourceTree = "<group>"; };
 		F5D85F722EF702FC00983F1B /* SlideshowControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideshowControlsView.swift; sourceTree = "<group>"; };
 		F6A0A0142F0B000100000001 /* LegacyIconFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyIconFactory.swift; sourceTree = "<group>"; };
+		F6A0A0152F0B000200000001 /* PhotoMiniClockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoMiniClockView.swift; sourceTree = "<group>"; };
 		F5D85F742EF7032F00983F1B /* ImageDisplayManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDisplayManager.swift; sourceTree = "<group>"; };
 		F5D85F752EF7032F00983F1B /* KenBurnsAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KenBurnsAnimator.swift; sourceTree = "<group>"; };
 		F5D85F762EF7032F00983F1B /* VideoPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerManager.swift; sourceTree = "<group>"; };
@@ -219,6 +223,7 @@
 			children = (
 				F551441D2EF5027A001835A0 /* MainViewController.swift */,
 				F551441E2EF5027A001835A0 /* SettingsViewController.swift */,
+				F6A0A0162F0B000300000001 /* ClockOnlyViewController.swift */,
 				F551441F2EF5027A001835A0 /* SlideShowViewController.swift */,
 				F5D85F7A2EF7035F00983F1B /* SlideShowViewController+Settings.swift */,
 				F55144202EF5027A001835A0 /* WebDAVBrowserViewController.swift */,
@@ -271,6 +276,7 @@
 				F551442B2EF5027A001835A0 /* DashboardView.swift */,
 				F6A0A0122F0B000100000001 /* WeekdaySelectorView.swift */,
 				F6A0A0142F0B000100000001 /* LegacyIconFactory.swift */,
+				F6A0A0152F0B000200000001 /* PhotoMiniClockView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -457,6 +463,8 @@
 				F55144372EF5027A001835A0 /* WebDAVBrowserViewController.swift in Sources */,
 				F5D85F732EF702FC00983F1B /* SlideshowControlsView.swift in Sources */,
 				F6A0A0042F0B000100000001 /* LegacyIconFactory.swift in Sources */,
+				F6A0A0052F0B000200000001 /* PhotoMiniClockView.swift in Sources */,
+				F6A0A0062F0B000300000001 /* ClockOnlyViewController.swift in Sources */,
 				F55144382EF5027A001835A0 /* MainViewController.swift in Sources */,
 				F55144392EF5027A001835A0 /* LocationService.swift in Sources */,
 				F551443A2EF5027A001835A0 /* WebDAVClient.swift in Sources */,

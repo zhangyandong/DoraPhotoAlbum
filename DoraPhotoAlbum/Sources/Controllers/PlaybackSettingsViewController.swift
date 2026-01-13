@@ -8,6 +8,7 @@ class PlaybackSettingsViewController: UIViewController, UITextFieldDelegate {
     private let durationField = UITextField()
     private let videoDurationField = UITextField()
     private let videoMutedSwitch = UISwitch()
+    private let showDashboardSwitch = UISwitch()
     private let contentModeSegment = UISegmentedControl(items: ["填充 (裁剪)", "适应 (完整)"])
     
     var onSave: (() -> Void)?
@@ -58,6 +59,7 @@ class PlaybackSettingsViewController: UIViewController, UITextFieldDelegate {
         stack.addArrangedSubview(videoDurationField)
         
         stack.addArrangedSubview(switchRow(title: "视频静音", toggle: videoMutedSwitch))
+        stack.addArrangedSubview(switchRow(title: "显示信息面板", toggle: showDashboardSwitch))
         
         stack.addArrangedSubview(createLabel("图片显示模式"))
         stack.addArrangedSubview(contentModeSegment)
@@ -132,6 +134,7 @@ class PlaybackSettingsViewController: UIViewController, UITextFieldDelegate {
         }
         
         defaults.set(videoMutedSwitch.isOn, forKey: AppConstants.Keys.kVideoMuted)
+        defaults.set(showDashboardSwitch.isOn, forKey: AppConstants.Keys.kShowDashboard)
         defaults.set(contentModeSegment.selectedSegmentIndex, forKey: AppConstants.Keys.kContentMode)
         defaults.synchronize()
         
@@ -159,6 +162,13 @@ class PlaybackSettingsViewController: UIViewController, UITextFieldDelegate {
             videoMutedSwitch.isOn = AppConstants.Defaults.videoMuted
         } else {
             videoMutedSwitch.isOn = defaults.bool(forKey: AppConstants.Keys.kVideoMuted)
+        }
+        
+        // Dashboard visibility
+        if defaults.object(forKey: AppConstants.Keys.kShowDashboard) == nil {
+            showDashboardSwitch.isOn = AppConstants.Defaults.showDashboard
+        } else {
+            showDashboardSwitch.isOn = defaults.bool(forKey: AppConstants.Keys.kShowDashboard)
         }
         
         // Use default if not set

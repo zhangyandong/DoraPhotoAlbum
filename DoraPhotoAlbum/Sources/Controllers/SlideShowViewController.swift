@@ -37,6 +37,7 @@ class SlideShowViewController: UIViewController {
     var isVideoMuted: Bool = false // Default to false (not muted) - will be loaded from UserDefaults
     var playMusicWithVideo: Bool = false // 是否在视频播放时继续背景音乐
     var contentMode: UIView.ContentMode = .scaleAspectFill
+    var showDashboard: Bool = true
     
     // MARK: - Private Properties
     
@@ -47,9 +48,10 @@ class SlideShowViewController: UIViewController {
     private var backImageView: UIImageView!
     private var timer: Timer?
     var wasMusicPlayingBeforeVideo: Bool = false
-    private var dashboardView: DashboardView?
+    // Used by settings extension to toggle visibility without restarting slideshow.
+    var dashboardView: DashboardView?
     private var controlsView: SlideshowControlsView?
-    private var clockOverlayView: ClockOverlayView?
+    private var photoMiniClockView: PhotoMiniClockView?
     var isClockMode: Bool = false
     private var isPaused: Bool = false
     private var wasPausedByUser: Bool = false // Track if paused manually by user
@@ -101,8 +103,9 @@ class SlideShowViewController: UIViewController {
         view.backgroundColor = .black
         setupViews()
         setupManagers()
-        setupDashboard()
-        setupClockOverlay()
+        setupControls()
+        setupDashboardIfNeeded()
+        setupPhotoMiniClock()
         setupGestures()
     }
     
@@ -136,7 +139,15 @@ class SlideShowViewController: UIViewController {
     
     // MARK: - UI Setup
     
-    private func setupDashboard() {
+    func setupDashboardIfNeeded() {
+        guard showDashboard else {
+            dashboardView?.removeFromSuperview()
+            dashboardView = nil
+            return
+        }
+        // Avoid duplicating if called from reloadSettings
+        if dashboardView != nil { return }
+        
         let dashboard = DashboardView(frame: .zero)
         dashboard.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(dashboard)
@@ -148,30 +159,27 @@ class SlideShowViewController: UIViewController {
             dashboard.widthAnchor.constraint(equalToConstant: adaptiveDashboardWidth())
         ])
         
-        setupControls()
     }
     
-    private func setupClockOverlay() {
-        let clock = ClockOverlayView()
-        clock.translatesAutoresizingMaskIntoConstraints = false
-        clock.alpha = isClockMode ? 1 : 0
-        view.addSubview(clock)
-        self.clockOverlayView = clock
-        
-        // Ensure controls are always on top
-        if let controls = controlsView {
-            view.bringSubviewToFront(controls)
-        }
+    private func setupPhotoMiniClock() {
+        let mini = PhotoMiniClockView()
+        mini.translatesAutoresizingMaskIntoConstraints = false
+        mini.alpha = (isClockMode && !items.isEmpty) ? 1 : 0
+        view.addSubview(mini)
+        self.photoMiniClockView = mini
         
         NSLayoutConstraint.activate([
-            clock.topAnchor.constraint(equalTo: view.topAnchor),
-            clock.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            clock.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            clock.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            mini.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
+            mini.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
         
-        if isClockMode {
-            clock.startUpdating()
+        if isClockMode && !items.isEmpty {
+            mini.startUpdating()
+        }
+        
+        // Ensure controls stay on top of mini clock if needed
+        if let controls = controlsView {
+            view.bringSubviewToFront(controls)
         }
     }
     
@@ -202,20 +210,13 @@ class SlideShowViewController: UIViewController {
     @objc private func toggleClockMode() {
         isClockMode.toggle()
         
-        guard let clock = clockOverlayView else { return }
-        
+        guard let mini = photoMiniClockView else { return }
         if isClockMode {
-            clock.startUpdating()
-            UIView.animate(withDuration: Constants.fadeDuration) {
-                clock.alpha = 1
-                // Dashboard remains visible, not affected by clock mode
-            }
+            mini.startUpdating()
+            UIView.animate(withDuration: Constants.fadeDuration) { mini.alpha = 1 }
         } else {
-            UIView.animate(withDuration: Constants.fadeDuration, animations: {
-                clock.alpha = 0
-                // Dashboard remains visible, not affected by clock mode
-            }) { _ in
-                clock.stopUpdating()
+            UIView.animate(withDuration: Constants.fadeDuration, animations: { mini.alpha = 0 }) { _ in
+                mini.stopUpdating()
             }
         }
     }
@@ -378,34 +379,6 @@ class SlideShowViewController: UIViewController {
         let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
         swipeRight.direction = .right
         view.addGestureRecognizer(swipeRight)
-        
-        let swipeUp = UISwipeGestureRecognizer(target: self, action: #selector(handleVerticalSwipe(_:)))
-        swipeUp.direction = .up
-        view.addGestureRecognizer(swipeUp)
-        
-        let swipeDown = UISwipeGestureRecognizer(target: self, action: #selector(handleVerticalSwipe(_:)))
-        swipeDown.direction = .down
-        view.addGestureRecognizer(swipeDown)
-    }
-    
-    @objc private func handleVerticalSwipe(_ gesture: UISwipeGestureRecognizer) {
-        // Only control clock overlay with vertical swipe, not dashboard
-        // guard isClockMode else { return }
-        
-        let shouldShow = (gesture.direction == .up)
-        
-        // If user reveals the clock via swipe (without tapping the clock button),
-        // we still need to start the timer so it ticks every second.
-        if shouldShow {
-            clockOverlayView?.startUpdating()
-        } else {
-            clockOverlayView?.stopUpdating()
-        }
-        
-        let targetAlpha: CGFloat = shouldShow ? 1 : 0
-        UIView.animate(withDuration: Constants.fadeDuration) {
-            self.clockOverlayView?.alpha = targetAlpha
-        }
     }
     
     @objc private func handleDoubleTap() {
@@ -461,6 +434,7 @@ class SlideShowViewController: UIViewController {
     // MARK: - Dashboard Updates
     
     private func updateDashboard(for item: UnifiedMediaItem) {
+        guard showDashboard else { return }
         dashboardView?.updatePhotoMeta(item)
     }
     
@@ -493,7 +467,7 @@ class SlideShowViewController: UIViewController {
         timer = nil
         videoPlayerManager?.stopVideo()
         MusicService.shared.stop()
-        clockOverlayView?.stopUpdating()
+        photoMiniClockView?.stopUpdating()
         imageDisplayManager?.cancelImageRequest()
         
         // Clear images from image views to free memory
@@ -520,31 +494,16 @@ class SlideShowViewController: UIViewController {
     
     func startSlideShow() {
         guard !items.isEmpty else {
-            // Offline / empty playlist fallback: still allow using slideshow as a clock screen.
-            enterClockOnlyMode()
+            // No media: route to dedicated pure clock screen.
+            let clockVC = ClockOnlyViewController()
+            clockVC.modalPresentationStyle = .fullScreen
+            present(clockVC, animated: false) { [weak self] in
+                self?.dismiss(animated: false)
+            }
             return
         }
         
         showNextItem()
-    }
-
-    private func enterClockOnlyMode() {
-        timer?.invalidate()
-        timer = nil
-        videoPlayerManager?.stopVideo()
-        imageDisplayManager?.cancelImageRequest()
-        imageDisplayManager?.clearAllImages()
-        imageDisplayManager?.hideImageViews(animated: false)
-        
-        isClockMode = true
-        clockOverlayView?.alpha = 1
-        clockOverlayView?.startUpdating()
-        
-        // In pure clock mode, simplify the control bar.
-        controlsView?.setClockOnlyMode(true)
-        
-        // Keep UI controls accessible
-        bringUIElementsToFront()
     }
     
     @objc private func handleTap() {
@@ -646,12 +605,12 @@ class SlideShowViewController: UIViewController {
         }
     }
     
-    private func bringUIElementsToFront() {
+    func bringUIElementsToFront() {
         if let dashboard = dashboardView {
             view.bringSubviewToFront(dashboard)
         }
-        if let clock = clockOverlayView {
-            view.bringSubviewToFront(clock)
+        if let mini = photoMiniClockView {
+            view.bringSubviewToFront(mini)
         }
         // Controls must be the topmost layer
         if let controls = controlsView {

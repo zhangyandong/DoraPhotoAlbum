@@ -62,7 +62,7 @@ class ClockOverlayView: UIView {
     private let containerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = UIColor.black.withAlphaComponent(0.4) // Slight dim for readability
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.4) // Slight dim for readability (default)
         // view.layer.cornerRadius = 20
         return view
     }()
@@ -107,6 +107,12 @@ class ClockOverlayView: UIView {
     deinit {
         stopUpdating()
         NotificationCenter.default.removeObserver(self)
+    }
+    
+    /// Controls whether the clock view draws a dimmed black background over the whole screen.
+    /// Default is `true` for readability. For a custom background (e.g. gradient), set to `false`.
+    func setDimBackgroundEnabled(_ enabled: Bool) {
+        containerView.backgroundColor = enabled ? UIColor.black.withAlphaComponent(0.4) : .clear
     }
     
     // MARK: - Setup
